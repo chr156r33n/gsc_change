@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.INFO)
 
 # Function to filter URLs by regex pattern
 def filter_by_regex(data, pattern):
-    return data[data['Top pages'].apply(lambda x: bool(re.search(pattern, x)))]
+    return data[data['Landing Page'].apply(lambda x: bool(re.search(pattern, x)))]
 
 # Function to calculate absolute and relative difference
 def calculate_differences(metric_current, metric_previous):
@@ -38,10 +38,11 @@ if uploaded_file is not None:
     if 'Date' not in data.columns:
         st.error("The CSV file must contain a 'Date' column with daily data.")
     else:
-        data['Date'] = pd.to_datetime(data['Date'])
+        data['Date'] = pd.to_datetime(data['Date'], format='%d %b %Y')
     
-    # Convert CTR (string with %) to numeric for easier handling
-    data['CTR'] = data['CTR'].str.rstrip('%').astype(float) / 100
+    # Convert CTR and metrics to numeric for easier handling
+    data['Url Clicks'] = pd.to_numeric(data['Url Clicks'], errors='coerce')
+    data['Impressions'] = pd.to_numeric(data['Impressions'], errors='coerce')
     
     # User inputs for deployment date range and regex
     test_regex = st.text_input("Enter regex for Test group", "")
@@ -84,16 +85,16 @@ if uploaded_file is not None:
         control_prev_year = filter_by_date(control_group, prev_year_test_start, prev_year_test_end)
 
         # Sum metrics for pre-test and previous year periods
-        test_metrics_pre_test = test_pre_test[['Clicks', 'Impressions', 'CTR']].sum()
-        test_metrics_prev_year = test_prev_year[['Clicks', 'Impressions', 'CTR']].sum()
+        test_metrics_pre_test = test_pre_test[['Url Clicks', 'Impressions']].sum()
+        test_metrics_prev_year = test_prev_year[['Url Clicks', 'Impressions']].sum()
         
-        control_metrics_pre_test = control_pre_test[['Clicks', 'Impressions', 'CTR']].sum()
-        control_metrics_prev_year = control_prev_year[['Clicks', 'Impressions', 'CTR']].sum()
+        control_metrics_pre_test = control_pre_test[['Url Clicks', 'Impressions']].sum()
+        control_metrics_prev_year = control_prev_year[['Url Clicks', 'Impressions']].sum()
 
         # Calculate differences for test and control groups
         test_differences = []
         control_differences = []
-        for metric in ['Clicks', 'Impressions', 'CTR']:
+        for metric in ['Url Clicks', 'Impressions']:
             abs_diff_test, rel_diff_test = calculate_differences(test_metrics_pre_test[metric], test_metrics_prev_year[metric])
             abs_diff_control, rel_diff_control = calculate_differences(control_metrics_pre_test[metric], control_metrics_prev_year[metric])
 
