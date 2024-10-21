@@ -91,7 +91,7 @@ if uploaded_file is not None:
         control_pre_test = filter_by_date(control_group, pre_test_start, pre_test_end)
         control_prev_year = filter_by_date(control_group, prev_year_test_start, prev_year_test_end)
 
-        # Sum metrics for each period
+        # Sum metrics for each period (test, pre-test, and previous year)
         test_metrics_pre_test = test_pre_test[['Url Clicks', 'Impressions']].sum()
         test_metrics_prev_year = test_prev_year[['Url Clicks', 'Impressions']].sum()
         control_metrics_pre_test = control_pre_test[['Url Clicks', 'Impressions']].sum()
@@ -139,12 +139,22 @@ if uploaded_file is not None:
         st.subheader("Control Group: Metric Differences (Test vs Pre-Test and YoY)")
         st.write(pd.DataFrame(control_differences))
 
-        # Display aggregate clicks and impressions for both test and control
-        st.subheader("Aggregate Clicks and Impressions")
-        st.write("Test Group - Test Period")
+        # Display aggregate clicks and impressions for each period
+        st.subheader("Aggregate Clicks and Impressions by Period")
+        
+        st.write("**Test Group - Test Period**")
         st.write(test_metrics_test_period)
-        st.write("Control Group - Test Period")
+        st.write("**Test Group - Pre-Test Period**")
+        st.write(test_metrics_pre_test)
+        st.write("**Test Group - Last Year's Test Period**")
+        st.write(test_metrics_prev_year)
+
+        st.write("**Control Group - Test Period**")
         st.write(control_metrics_test_period)
+        st.write("**Control Group - Pre-Test Period**")
+        st.write(control_metrics_pre_test)
+        st.write("**Control Group - Last Year's Test Period**")
+        st.write(control_metrics_prev_year)
 
 # Logging for debugging
 if uploaded_file is None:
