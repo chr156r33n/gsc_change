@@ -47,7 +47,7 @@ if uploaded_file is not None:
         
         # Check for NaT values in 'Date'
         if data['Date'].isnull().any():
-            st.warning("There are invalid dates in the 'Date' column. These will be marked as NaT.")
+            st.warning("There are invalid dates in the 'Date' column. These will be marked as NaT. Please check all dates are yyyy-mm-dd format.")
             st.write(data[data['Date'].isnull()])
     
     # Convert Url Clicks and Impressions to numeric for easier handling
