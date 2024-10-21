@@ -27,7 +27,7 @@ def filter_by_date(data, start_date, end_date):
 
 # Streamlit interface
 st.title("GSC Page Group Analysis")
-st.markdown("Export the GSC data in the right format from [here](https://lookerstudio.google.com/u/0/reporting/b0929a34-f438-45c3-be58-09d995a3f401/page/ZuKGE/edit). Just ensure you have enough data to cover the pre and post change date range!")
+st.markdown("Export the GSC data in the right format from [here](https://lookerstudio.google.com/u/0/reporting/7d53bdfb-263d-484d-a959-0d9205eaf2e2/page/hiLGE/edit). Just ensure you have enough data to cover the pre and post change date range!")
 
 # Upload CSV file
 uploaded_file = st.file_uploader("Upload GSC CSV", type="csv")
