@@ -12,9 +12,12 @@ def filter_by_regex(data, pattern):
     return data[data['Top pages'].apply(lambda x: bool(re.search(pattern, x)))]
 
 # Function to calculate absolute and relative difference
-def calculate_differences(df, metric, period1, period2):
-    abs_diff = df[period1] - df[period2]
-    rel_diff = (abs_diff / df[period2]) * 100
+def calculate_differences(metric_test, metric_control):
+    abs_diff = metric_test - metric_control
+    if metric_control != 0:
+        rel_diff = (abs_diff / metric_control) * 100
+    else:
+        rel_diff = float('nan')
     return abs_diff, rel_diff
 
 # Streamlit interface
@@ -25,6 +28,9 @@ uploaded_file = st.file_uploader("Upload GSC CSV", type="csv")
 if uploaded_file is not None:
     # Read CSV into a DataFrame
     data = pd.read_csv(uploaded_file)
+    
+    # Convert CTR (string with %) to numeric for easier handling
+    data['CTR'] = data['CTR'].str.rstrip('%').astype(float) / 100
     
     # User inputs for deployment date range and regex
     test_regex = st.text_input("Enter regex for Test group", "")
@@ -51,19 +57,18 @@ if uploaded_file is not None:
         else:
             control_group = data[~data.index.isin(test_group.index)]
         
-        # Calculate metrics for test and control groups
+        # Sum metrics for test and control periods
+        test_metrics = test_group[['Clicks', 'Impressions', 'CTR']].sum()
+        control_metrics = control_group[['Clicks', 'Impressions', 'CTR']].sum()
+
+        # Calculate differences for each metric
         differences = []
         for metric in ['Clicks', 'Impressions', 'CTR']:
-            abs_diff_test, rel_diff_test = calculate_differences(test_group, metric, 'Clicks', 'Impressions')
-            abs_diff_control, rel_diff_control = calculate_differences(control_group, metric, 'Clicks', 'Impressions')
-
-            # Append results to be displayed
+            abs_diff, rel_diff = calculate_differences(test_metrics[metric], control_metrics[metric])
             differences.append({
                 "Metric": metric,
-                "Test Group Absolute Difference": abs_diff_test.sum(),
-                "Test Group Relative Difference (%)": rel_diff_test.mean(),
-                "Control Group Absolute Difference": abs_diff_control.sum(),
-                "Control Group Relative Difference (%)": rel_diff_control.mean()
+                "Test Group Absolute Difference": abs_diff,
+                "Test Group Relative Difference (%)": rel_diff
             })
         
         # Display grouped URLs
