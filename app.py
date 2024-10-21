@@ -46,23 +46,33 @@ if uploaded_file is not None:
             control_group = data[~data.index.isin(test_group.index)]
         
         # Calculate metrics for test and control groups
+        differences = []
         for metric in ['Clicks', 'Impressions', 'CTR']:
             abs_diff_test, rel_diff_test = calculate_differences(test_group, metric, 'Clicks', 'Impressions')
             abs_diff_control, rel_diff_control = calculate_differences(control_group, metric, 'Clicks', 'Impressions')
 
-        # Show grouped URLs
+            # Append results to be displayed
+            differences.append({
+                "Metric": metric,
+                "Test Group Absolute Difference": abs_diff_test.sum(),
+                "Test Group Relative Difference (%)": rel_diff_test.mean(),
+                "Control Group Absolute Difference": abs_diff_control.sum(),
+                "Control Group Relative Difference (%)": rel_diff_control.mean()
+            })
+        
+        # Display grouped URLs
         st.subheader("Test Group URLs")
         st.write(test_group)
         
         st.subheader("Control Group URLs")
         st.write(control_group)
 
+        # Display metric differences
         st.subheader("Differences in Metrics")
-        st.write("Absolute and Relative Differences (Test vs Pre-test and Year-over-Year)")
+        st.write(pd.DataFrame(differences))
 
 # Logging for debugging
 if uploaded_file is None:
     logging.info("Waiting for file upload...")
 else:
     logging.info("File uploaded and analysis in progress.")
-
