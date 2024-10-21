@@ -12,10 +12,10 @@ def filter_by_regex(data, pattern):
     return data[data['Top pages'].apply(lambda x: bool(re.search(pattern, x)))]
 
 # Function to calculate absolute and relative difference
-def calculate_differences(metric_test, metric_control):
-    abs_diff = metric_test - metric_control
-    if metric_control != 0:
-        rel_diff = (abs_diff / metric_control) * 100
+def calculate_differences(metric_current, metric_previous):
+    abs_diff = metric_current - metric_previous
+    if metric_previous != 0:
+        rel_diff = (abs_diff / metric_previous) * 100
     else:
         rel_diff = float('nan')
     return abs_diff, rel_diff
@@ -43,9 +43,17 @@ if uploaded_file is not None:
     # Automatically calculate the control period
     if test_start and test_end:
         test_period_length = (test_end - test_start).days
-        control_end = test_start - timedelta(days=1)
-        control_start = control_end - timedelta(days=test_period_length)
-        st.write(f"Control period automatically set to: {control_start} to {control_end}")
+        
+        # Pre-test period
+        pre_test_end = test_start - timedelta(days=1)
+        pre_test_start = pre_test_end - timedelta(days=test_period_length)
+        
+        # Previous year same period
+        prev_year_test_start = test_start - timedelta(days=365)
+        prev_year_test_end = test_end - timedelta(days=365)
+        
+        st.write(f"Pre-test period: {pre_test_start} to {pre_test_end}")
+        st.write(f"Previous year (same as test period): {prev_year_test_start} to {prev_year_test_end}")
     
     if st.button("Analyze"):
         # Filter test group using regex
@@ -57,18 +65,30 @@ if uploaded_file is not None:
         else:
             control_group = data[~data.index.isin(test_group.index)]
         
-        # Sum metrics for test and control periods
-        test_metrics = test_group[['Clicks', 'Impressions', 'CTR']].sum()
-        control_metrics = control_group[['Clicks', 'Impressions', 'CTR']].sum()
+        # Sum metrics for test, pre-test, and previous year periods
+        test_metrics_current = test_group[['Clicks', 'Impressions', 'CTR']].sum()
+        test_metrics_previous = test_group[['Clicks', 'Impressions', 'CTR']].sum()  # For now, simulate data
+        
+        control_metrics_current = control_group[['Clicks', 'Impressions', 'CTR']].sum()
+        control_metrics_previous = control_group[['Clicks', 'Impressions', 'CTR']].sum()  # For now, simulate data
 
-        # Calculate differences for each metric
-        differences = []
+        # Calculate differences for test and control groups
+        test_differences = []
+        control_differences = []
         for metric in ['Clicks', 'Impressions', 'CTR']:
-            abs_diff, rel_diff = calculate_differences(test_metrics[metric], control_metrics[metric])
-            differences.append({
+            abs_diff_test, rel_diff_test = calculate_differences(test_metrics_current[metric], test_metrics_previous[metric])
+            abs_diff_control, rel_diff_control = calculate_differences(control_metrics_current[metric], control_metrics_previous[metric])
+
+            test_differences.append({
                 "Metric": metric,
-                "Test Group Absolute Difference": abs_diff,
-                "Test Group Relative Difference (%)": rel_diff
+                "Test Group Absolute Difference": abs_diff_test,
+                "Test Group Relative Difference (%)": rel_diff_test
+            })
+
+            control_differences.append({
+                "Metric": metric,
+                "Control Group Absolute Difference": abs_diff_control,
+                "Control Group Relative Difference (%)": rel_diff_control
             })
         
         # Display grouped URLs
@@ -78,9 +98,13 @@ if uploaded_file is not None:
         st.subheader("Control Group URLs")
         st.write(control_group)
 
-        # Display metric differences
-        st.subheader("Differences in Metrics")
-        st.write(pd.DataFrame(differences))
+        # Display metric differences for test group
+        st.subheader("Test Group Differences in Metrics (Pre-Test vs. Same Period Last Year)")
+        st.write(pd.DataFrame(test_differences))
+
+        # Display metric differences for control group
+        st.subheader("Control Group Differences in Metrics (Pre-Test vs. Same Period Last Year)")
+        st.write(pd.DataFrame(control_differences))
 
 # Logging for debugging
 if uploaded_file is None:
