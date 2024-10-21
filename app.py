@@ -53,7 +53,7 @@ if uploaded_file is not None:
     
     # User inputs for deployment date range and regex
     test_regex = st.text_input("Enter regex for Test group", "")
-    control_regex = st.text_input("Enter regex for Control group (optional) - Leave blank to compare against all page performance.", "")
+    control_regex = st.text_input("Enter regex for Control group (optional) - Leave blank to compare against all pages except the test group.", "")
     
     # Select test date range
     test_start = st.date_input("Test Start Date")
