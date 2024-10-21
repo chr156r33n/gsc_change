@@ -53,7 +53,7 @@ if uploaded_file is not None:
     
     # User inputs for deployment date range and regex
     test_regex = st.text_input("Enter regex for Test group", "")
-    control_regex = st.text_input("Enter regex for Control group (optional) - Leave blank to compare against all pages except the test group.", "")
+    control_regex = st.text_input("Enter regex for Control group (optional) - Leave blank to compare against all page performance.", "")
     
     # Select test date range
     test_start = st.date_input("Test Start Date")
@@ -109,13 +109,17 @@ if uploaded_file is not None:
             test_differences.append({
                 "Metric": metric,
                 "Test Group Absolute Difference": abs_diff_test,
-                "Test Group Relative Difference (%)": rel_diff_test
+                "Test Group Relative Difference (%)": rel_diff_test,
+                "Test Group Pre-Test Total": test_metrics_pre_test[metric],
+                "Test Group Previous Year Total": test_metrics_prev_year[metric],
             })
 
             control_differences.append({
                 "Metric": metric,
                 "Control Group Absolute Difference": abs_diff_control,
-                "Control Group Relative Difference (%)": rel_diff_control
+                "Control Group Relative Difference (%)": rel_diff_control,
+                "Control Group Pre-Test Total": control_metrics_pre_test[metric],
+                "Control Group Previous Year Total": control_metrics_prev_year[metric],
             })
         
         # Display metric differences for test group
