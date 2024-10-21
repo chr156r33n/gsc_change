@@ -112,6 +112,7 @@ if uploaded_file is not None:
                 "Test Group Relative Difference (%)": rel_diff_test,
                 "Test Group Pre-Test Total": test_metrics_pre_test[metric],
                 "Test Group Previous Year Total": test_metrics_prev_year[metric],
+                "Test Group Test Period Total": test_metrics_pre_test[metric],
             })
 
             control_differences.append({
@@ -120,6 +121,7 @@ if uploaded_file is not None:
                 "Control Group Relative Difference (%)": rel_diff_control,
                 "Control Group Pre-Test Total": control_metrics_pre_test[metric],
                 "Control Group Previous Year Total": control_metrics_prev_year[metric],
+                "Control Group Test Period Total": control_metrics_pre_test[metric],
             })
         
         # Display metric differences for test group
