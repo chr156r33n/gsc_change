@@ -20,6 +20,11 @@ def calculate_differences(metric_current, metric_previous):
         rel_diff = float('nan')
     return abs_diff, rel_diff
 
+# Function to filter data by date range
+def filter_by_date(data, start_date, end_date):
+    mask = (data['Date'] >= pd.to_datetime(start_date)) & (data['Date'] <= pd.to_datetime(end_date))
+    return data.loc[mask]
+
 # Streamlit interface
 st.title("GSC Page Group Analysis")
 
@@ -28,6 +33,12 @@ uploaded_file = st.file_uploader("Upload GSC CSV", type="csv")
 if uploaded_file is not None:
     # Read CSV into a DataFrame
     data = pd.read_csv(uploaded_file)
+
+    # Ensure there's a 'Date' column and convert to datetime
+    if 'Date' not in data.columns:
+        st.error("The CSV file must contain a 'Date' column with daily data.")
+    else:
+        data['Date'] = pd.to_datetime(data['Date'])
     
     # Convert CTR (string with %) to numeric for easier handling
     data['CTR'] = data['CTR'].str.rstrip('%').astype(float) / 100
@@ -65,19 +76,26 @@ if uploaded_file is not None:
         else:
             control_group = data[~data.index.isin(test_group.index)]
         
-        # Sum metrics for test, pre-test, and previous year periods
-        test_metrics_current = test_group[['Clicks', 'Impressions', 'CTR']].sum()
-        test_metrics_previous = test_group[['Clicks', 'Impressions', 'CTR']].sum()  # For now, simulate data
+        # Filter data by pre-test period and previous year period
+        test_pre_test = filter_by_date(test_group, pre_test_start, pre_test_end)
+        test_prev_year = filter_by_date(test_group, prev_year_test_start, prev_year_test_end)
+
+        control_pre_test = filter_by_date(control_group, pre_test_start, pre_test_end)
+        control_prev_year = filter_by_date(control_group, prev_year_test_start, prev_year_test_end)
+
+        # Sum metrics for pre-test and previous year periods
+        test_metrics_pre_test = test_pre_test[['Clicks', 'Impressions', 'CTR']].sum()
+        test_metrics_prev_year = test_prev_year[['Clicks', 'Impressions', 'CTR']].sum()
         
-        control_metrics_current = control_group[['Clicks', 'Impressions', 'CTR']].sum()
-        control_metrics_previous = control_group[['Clicks', 'Impressions', 'CTR']].sum()  # For now, simulate data
+        control_metrics_pre_test = control_pre_test[['Clicks', 'Impressions', 'CTR']].sum()
+        control_metrics_prev_year = control_prev_year[['Clicks', 'Impressions', 'CTR']].sum()
 
         # Calculate differences for test and control groups
         test_differences = []
         control_differences = []
         for metric in ['Clicks', 'Impressions', 'CTR']:
-            abs_diff_test, rel_diff_test = calculate_differences(test_metrics_current[metric], test_metrics_previous[metric])
-            abs_diff_control, rel_diff_control = calculate_differences(control_metrics_current[metric], control_metrics_previous[metric])
+            abs_diff_test, rel_diff_test = calculate_differences(test_metrics_pre_test[metric], test_metrics_prev_year[metric])
+            abs_diff_control, rel_diff_control = calculate_differences(control_metrics_pre_test[metric], control_metrics_prev_year[metric])
 
             test_differences.append({
                 "Metric": metric,
