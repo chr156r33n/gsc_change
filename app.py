@@ -39,9 +39,6 @@ if uploaded_file is not None:
     if 'Date' not in data.columns:
         st.error("The CSV file must contain a 'Date' column with daily data.")
     else:
-        # Print the first few rows to debug
-        # st.write("Raw date data:", data['Date'].head())
-        
         # Convert 'Date' column to datetime with error handling
         data['Date'] = pd.to_datetime(data['Date'], format='%Y-%m-%d', errors='coerce')
         
@@ -80,11 +77,12 @@ if uploaded_file is not None:
     if st.button("Analyze"):
         # Filter test group using regex
         test_group = filter_by_regex(data, test_regex)
-        
-        # Filter control group, default to everything else if no regex provided
+
+        # Filter control group: if control_regex is empty, exclude the test group URLs
         if control_regex:
             control_group = filter_by_regex(data, control_regex)
         else:
+            # Use negative indexing to exclude the test group from the data
             control_group = data[~data.index.isin(test_group.index)]
         
         # Filter data by pre-test period and previous year period
