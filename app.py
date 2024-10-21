@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import re
 import logging
+from datetime import timedelta
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -32,8 +33,16 @@ if uploaded_file is not None:
     # Select date ranges
     test_start = st.date_input("Test Start Date")
     test_end = st.date_input("Test End Date")
-    pre_test_start = st.date_input("Pre-Test Start Date")
-    pre_test_end = st.date_input("Pre-Test End Date")
+    
+    # Automatically calculate the control period
+    if test_start and test_end:
+        test_period_length = (test_end - test_start).days
+        control_end = test_start - timedelta(days=1)
+        control_start = control_end - timedelta(days=test_period_length)
+        st.write(f"Control period automatically set to: {control_start} to {control_end}")
+    
+    pre_test_start = st.date_input("Pre-Test Start Date", control_start)
+    pre_test_end = st.date_input("Pre-Test End Date", control_end)
     
     if st.button("Analyze"):
         # Filter test group using regex
