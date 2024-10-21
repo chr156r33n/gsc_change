@@ -38,9 +38,18 @@ if uploaded_file is not None:
     if 'Date' not in data.columns:
         st.error("The CSV file must contain a 'Date' column with daily data.")
     else:
-        data['Date'] = pd.to_datetime(data['Date'], format='%d %b %Y')
+        # Print the first few rows to debug
+        st.write("Raw date data:", data['Date'].head())
+        
+        # Convert 'Date' column to datetime with error handling
+        data['Date'] = pd.to_datetime(data['Date'], format='%d %b %Y', errors='coerce')
+        
+        # Check for NaT values in 'Date'
+        if data['Date'].isnull().any():
+            st.warning("There are invalid dates in the 'Date' column. These will be marked as NaT.")
+            st.write(data[data['Date'].isnull()])
     
-    # Convert CTR and metrics to numeric for easier handling
+    # Convert Url Clicks and Impressions to numeric for easier handling
     data['Url Clicks'] = pd.to_numeric(data['Url Clicks'], errors='coerce')
     data['Impressions'] = pd.to_numeric(data['Impressions'], errors='coerce')
     
