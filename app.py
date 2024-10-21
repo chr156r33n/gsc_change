@@ -30,7 +30,7 @@ if uploaded_file is not None:
     test_regex = st.text_input("Enter regex for Test group", "")
     control_regex = st.text_input("Enter regex for Control group (optional)", "")
     
-    # Select date ranges
+    # Select test date range
     test_start = st.date_input("Test Start Date")
     test_end = st.date_input("Test End Date")
     
@@ -40,9 +40,6 @@ if uploaded_file is not None:
         control_end = test_start - timedelta(days=1)
         control_start = control_end - timedelta(days=test_period_length)
         st.write(f"Control period automatically set to: {control_start} to {control_end}")
-    
-    pre_test_start = st.date_input("Pre-Test Start Date", control_start)
-    pre_test_end = st.date_input("Pre-Test End Date", control_end)
     
     if st.button("Analyze"):
         # Filter test group using regex
