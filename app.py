@@ -40,7 +40,7 @@ if uploaded_file is not None:
         st.error("The CSV file must contain a 'Date' column with daily data.")
     else:
         # Print the first few rows to debug
-        st.write("Raw date data:", data['Date'].head())
+        # st.write("Raw date data:", data['Date'].head())
         
         # Convert 'Date' column to datetime with error handling
         data['Date'] = pd.to_datetime(data['Date'], format='%Y-%m-%d', errors='coerce')
