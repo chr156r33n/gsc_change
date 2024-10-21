@@ -119,13 +119,6 @@ if uploaded_file is not None:
                 "Control Group Relative Difference (%)": rel_diff_control
             })
         
-        # Display grouped URLs
-        st.subheader("Test Group URLs")
-        st.write(test_group)
-        
-        st.subheader("Control Group URLs")
-        st.write(control_group)
-
         # Display metric differences for test group
         st.subheader("Test Group Differences in Metrics (Pre-Test vs. Same Period Last Year)")
         st.write(pd.DataFrame(test_differences))
@@ -133,6 +126,13 @@ if uploaded_file is not None:
         # Display metric differences for control group
         st.subheader("Control Group Differences in Metrics (Pre-Test vs. Same Period Last Year)")
         st.write(pd.DataFrame(control_differences))
+
+        # Display grouped URLs
+        st.subheader("Test Group URLs")
+        st.write(test_group)
+        
+        st.subheader("Control Group URLs")
+        st.write(control_group)
 
 # Logging for debugging
 if uploaded_file is None:
