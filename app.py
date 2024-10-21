@@ -42,7 +42,7 @@ if uploaded_file is not None:
         st.write("Raw date data:", data['Date'].head())
         
         # Convert 'Date' column to datetime with error handling
-        data['Date'] = pd.to_datetime(data['Date'], format='%d %b %Y', errors='coerce')
+        data['Date'] = pd.to_datetime(data['Date'], format='%Y-%m-%d', errors='coerce')
         
         # Check for NaT values in 'Date'
         if data['Date'].isnull().any():
