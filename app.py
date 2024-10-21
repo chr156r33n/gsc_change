@@ -77,12 +77,12 @@ if uploaded_file is not None:
     if st.button("Analyze"):
         # Filter test group using regex
         test_group = filter_by_regex(data, test_regex)
-
-        # Filter control group: if control_regex is empty, exclude the test group URLs
+        
+        # Filter control group, default to everything else if no regex provided
         if control_regex:
             control_group = filter_by_regex(data, control_regex)
         else:
-            # Use negative indexing to exclude the test group from the data
+            # Exclude the test group from the control group
             control_group = data[~data.index.isin(test_group.index)]
         
         # Filter data by pre-test period and previous year period
@@ -99,6 +99,10 @@ if uploaded_file is not None:
         control_metrics_pre_test = control_pre_test[['Url Clicks', 'Impressions']].sum()
         control_metrics_prev_year = control_prev_year[['Url Clicks', 'Impressions']].sum()
 
+        # Filter data by test period
+        test_period = filter_by_date(test_group, test_start, test_end)
+        test_metrics_test_period = test_period[['Url Clicks', 'Impressions']].sum()
+
         # Calculate differences for test and control groups
         test_differences = []
         control_differences = []
@@ -112,7 +116,7 @@ if uploaded_file is not None:
                 "Test Group Relative Difference (%)": rel_diff_test,
                 "Test Group Pre-Test Total": test_metrics_pre_test[metric],
                 "Test Group Previous Year Total": test_metrics_prev_year[metric],
-                "Test Group Test Period Total": test_metrics_pre_test[metric],
+                "Test Group Test Period Total": test_metrics_test_period[metric],
             })
 
             control_differences.append({
@@ -121,7 +125,7 @@ if uploaded_file is not None:
                 "Control Group Relative Difference (%)": rel_diff_control,
                 "Control Group Pre-Test Total": control_metrics_pre_test[metric],
                 "Control Group Previous Year Total": control_metrics_prev_year[metric],
-                "Control Group Test Period Total": control_metrics_pre_test[metric],
+                "Control Group Test Period Total": control_metrics_pre_test[metric],  # Remains the same
             })
         
         # Display metric differences for test group
