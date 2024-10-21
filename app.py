@@ -88,60 +88,63 @@ if uploaded_file is not None:
         # Filter data by pre-test period and previous year period
         test_pre_test = filter_by_date(test_group, pre_test_start, pre_test_end)
         test_prev_year = filter_by_date(test_group, prev_year_test_start, prev_year_test_end)
-
         control_pre_test = filter_by_date(control_group, pre_test_start, pre_test_end)
         control_prev_year = filter_by_date(control_group, prev_year_test_start, prev_year_test_end)
 
-        # Sum metrics for pre-test and previous year periods
+        # Sum metrics for each period
         test_metrics_pre_test = test_pre_test[['Url Clicks', 'Impressions']].sum()
         test_metrics_prev_year = test_prev_year[['Url Clicks', 'Impressions']].sum()
-        
         control_metrics_pre_test = control_pre_test[['Url Clicks', 'Impressions']].sum()
         control_metrics_prev_year = control_prev_year[['Url Clicks', 'Impressions']].sum()
-
+        
         # Filter data by test period
         test_period = filter_by_date(test_group, test_start, test_end)
         test_metrics_test_period = test_period[['Url Clicks', 'Impressions']].sum()
+        control_period = filter_by_date(control_group, test_start, test_end)
+        control_metrics_test_period = control_period[['Url Clicks', 'Impressions']].sum()
 
         # Calculate differences for test and control groups
         test_differences = []
         control_differences = []
         for metric in ['Url Clicks', 'Impressions']:
-            abs_diff_test, rel_diff_test = calculate_differences(test_metrics_pre_test[metric], test_metrics_prev_year[metric])
-            abs_diff_control, rel_diff_control = calculate_differences(control_metrics_pre_test[metric], control_metrics_prev_year[metric])
+            # Test Group: test vs pre-test, and test vs previous year
+            abs_diff_test_pre, rel_diff_test_pre = calculate_differences(test_metrics_test_period[metric], test_metrics_pre_test[metric])
+            abs_diff_test_yoy, rel_diff_test_yoy = calculate_differences(test_metrics_test_period[metric], test_metrics_prev_year[metric])
 
             test_differences.append({
                 "Metric": metric,
-                "Test Group Absolute Difference": abs_diff_test,
-                "Test Group Relative Difference (%)": rel_diff_test,
-                "Test Group Pre-Test Total": test_metrics_pre_test[metric],
-                "Test Group Previous Year Total": test_metrics_prev_year[metric],
-                "Test Group Test Period Total": test_metrics_test_period[metric],
+                "Test Group Absolute Difference (vs Pre-Test)": abs_diff_test_pre,
+                "Test Group Relative Difference (vs Pre-Test) (%)": rel_diff_test_pre,
+                "Test Group Absolute Difference (vs YoY)": abs_diff_test_yoy,
+                "Test Group Relative Difference (vs YoY) (%)": rel_diff_test_yoy
             })
+
+            # Control Group: test vs pre-test, and test vs previous year
+            abs_diff_control_pre, rel_diff_control_pre = calculate_differences(control_metrics_test_period[metric], control_metrics_pre_test[metric])
+            abs_diff_control_yoy, rel_diff_control_yoy = calculate_differences(control_metrics_test_period[metric], control_metrics_prev_year[metric])
 
             control_differences.append({
                 "Metric": metric,
-                "Control Group Absolute Difference": abs_diff_control,
-                "Control Group Relative Difference (%)": rel_diff_control,
-                "Control Group Pre-Test Total": control_metrics_pre_test[metric],
-                "Control Group Previous Year Total": control_metrics_prev_year[metric],
-                "Control Group Test Period Total": control_metrics_pre_test[metric],  # Remains the same
+                "Control Group Absolute Difference (vs Pre-Test)": abs_diff_control_pre,
+                "Control Group Relative Difference (vs Pre-Test) (%)": rel_diff_control_pre,
+                "Control Group Absolute Difference (vs YoY)": abs_diff_control_yoy,
+                "Control Group Relative Difference (vs YoY) (%)": rel_diff_control_yoy
             })
         
         # Display metric differences for test group
-        st.subheader("Test Group Differences in Metrics (Pre-Test vs. Same Period Last Year)")
+        st.subheader("Test Group: Metric Differences (Test vs Pre-Test and YoY)")
         st.write(pd.DataFrame(test_differences))
 
         # Display metric differences for control group
-        st.subheader("Control Group Differences in Metrics (Pre-Test vs. Same Period Last Year)")
+        st.subheader("Control Group: Metric Differences (Test vs Pre-Test and YoY)")
         st.write(pd.DataFrame(control_differences))
 
-        # Display grouped URLs
-        st.subheader("Test Group URLs")
-        st.write(test_group)
-        
-        st.subheader("Control Group URLs")
-        st.write(control_group)
+        # Display aggregate clicks and impressions for both test and control
+        st.subheader("Aggregate Clicks and Impressions")
+        st.write("Test Group - Test Period")
+        st.write(test_metrics_test_period)
+        st.write("Control Group - Test Period")
+        st.write(control_metrics_test_period)
 
 # Logging for debugging
 if uploaded_file is None:
