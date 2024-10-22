@@ -107,49 +107,49 @@ if uploaded_file is not None:
         control_metrics_test_period = control_period[['Url Clicks', 'Impressions']].sum()
 
         # Calculate clicks and impressions per day
-        test_clicks_per_day_test = test_metrics_test_period['Url Clicks'] / len(test_period)
-        test_impressions_per_day_test = test_metrics_test_period['Impressions'] / len(test_period)
+        test_clicks_per_day_test = round(test_metrics_test_period['Url Clicks'] / len(test_period), 2)
+        test_impressions_per_day_test = round(test_metrics_test_period['Impressions'] / len(test_period), 2)
 
-        test_clicks_per_day_pre_test = test_metrics_pre_test['Url Clicks'] / len(test_pre_test)
-        test_impressions_per_day_pre_test = test_metrics_pre_test['Impressions'] / len(test_pre_test)
+        test_clicks_per_day_pre_test = round(test_metrics_pre_test['Url Clicks'] / len(test_pre_test), 2)
+        test_impressions_per_day_pre_test = round(test_metrics_pre_test['Impressions'] / len(test_pre_test), 2)
 
-        test_clicks_per_day_prev_year = test_metrics_prev_year['Url Clicks'] / len(test_prev_year)
-        test_impressions_per_day_prev_year = test_metrics_prev_year['Impressions'] / len(test_prev_year)
+        test_clicks_per_day_prev_year = round(test_metrics_prev_year['Url Clicks'] / len(test_prev_year), 2)
+        test_impressions_per_day_prev_year = round(test_metrics_prev_year['Impressions'] / len(test_prev_year), 2)
 
-        control_clicks_per_day_test = control_metrics_test_period['Url Clicks'] / len(control_period)
-        control_impressions_per_day_test = control_metrics_test_period['Impressions'] / len(control_period)
+        control_clicks_per_day_test = round(control_metrics_test_period['Url Clicks'] / len(control_period), 2)
+        control_impressions_per_day_test = round(control_metrics_test_period['Impressions'] / len(control_period), 2)
 
-        control_clicks_per_day_pre_test = control_metrics_pre_test['Url Clicks'] / len(control_pre_test)
-        control_impressions_per_day_pre_test = control_metrics_pre_test['Impressions'] / len(control_pre_test)
+        control_clicks_per_day_pre_test = round(control_metrics_pre_test['Url Clicks'] / len(control_pre_test), 2)
+        control_impressions_per_day_pre_test = round(control_metrics_pre_test['Impressions'] / len(control_pre_test), 2)
 
-        control_clicks_per_day_prev_year = control_metrics_prev_year['Url Clicks'] / len(control_prev_year)
-        control_impressions_per_day_prev_year = control_metrics_prev_year['Impressions'] / len(control_prev_year)
+        control_clicks_per_day_prev_year = round(control_metrics_prev_year['Url Clicks'] / len(control_prev_year), 2)
+        control_impressions_per_day_prev_year = round(control_metrics_prev_year['Impressions'] / len(control_prev_year), 2)
 
         # Display aggregate clicks and impressions for each period, including per day metrics
         st.subheader("Aggregate Clicks and Impressions by Period (Test Group)")
 
         st.write("**Test Group - Test Period**")
-        st.write(test_metrics_test_period)
+        st.write(test_metrics_test_period.round(2))
         st.write(f"Clicks per day: {test_clicks_per_day_test}, Impressions per day: {test_impressions_per_day_test}")
 
         st.write("**Test Group - Pre-Test Period**")
-        st.write(test_metrics_pre_test)
+        st.write(test_metrics_pre_test.round(2))
         st.write(f"Clicks per day: {test_clicks_per_day_pre_test}, Impressions per day: {test_impressions_per_day_pre_test}")
 
         st.write("**Test Group - Last Year's Test Period**")
-        st.write(test_metrics_prev_year)
+        st.write(test_metrics_prev_year.round(2))
         st.write(f"Clicks per day: {test_clicks_per_day_prev_year}, Impressions per day: {test_impressions_per_day_prev_year}")
 
         st.subheader("Aggregate Clicks and Impressions by Period (Control Group)")
 
         st.write("**Control Group - Test Period**")
-        st.write(control_metrics_test_period)
+        st.write(control_metrics_test_period.round(2))
         st.write(f"Clicks per day: {control_clicks_per_day_test}, Impressions per day: {control_impressions_per_day_test}")
 
         st.write("**Control Group - Pre-Test Period**")
-        st.write(control_metrics_pre_test)
+        st.write(control_metrics_pre_test.round(2))
         st.write(f"Clicks per day: {control_clicks_per_day_pre_test}, Impressions per day: {control_impressions_per_day_pre_test}")
 
         st.write("**Control Group - Last Year's Test Period**")
-        st.write(control_metrics_prev_year)
+        st.write(control_metrics_prev_year.round(2))
         st.write(f"Clicks per day: {control_clicks_per_day_prev_year}, Impressions per day: {control_impressions_per_day_prev_year}")
