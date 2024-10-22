@@ -162,6 +162,29 @@ if uploaded_file is not None:
         st.write("**Control Group - Last Year's Test Period**")
         st.write(control_metrics_prev_year)
 
+        # Summary of results
+        st.subheader("Summary of Analysis Results")
+        
+        # Calculate overall changes
+        overall_test_clicks_change = test_metrics_test_period['Url Clicks'] - test_metrics_pre_test['Url Clicks']
+        overall_control_clicks_change = control_metrics_test_period['Url Clicks'] - control_metrics_pre_test['Url Clicks']
+        
+        overall_test_impressions_change = test_metrics_test_period['Impressions'] - test_metrics_pre_test['Impressions']
+        overall_control_impressions_change = control_metrics_test_period['Impressions'] - control_metrics_pre_test['Impressions']
+        
+        # Display summary
+        st.write(f"**Overall Change in Test Group Clicks:** {overall_test_clicks_change} (Test Period vs Pre-Test Period)")
+        st.write(f"**Overall Change in Control Group Clicks:** {overall_control_clicks_change} (Test Period vs Pre-Test Period)")
+        
+        st.write(f"**Overall Change in Test Group Impressions:** {overall_test_impressions_change} (Test Period vs Pre-Test Period)")
+        st.write(f"**Overall Change in Control Group Impressions:** {overall_control_impressions_change} (Test Period vs Pre-Test Period)")
+
+        # Additional insights
+        if overall_test_clicks_change > overall_control_clicks_change:
+            st.write("The Test Group has shown a greater increase in clicks compared to the Control Group.")
+        else:
+            st.write("The Control Group has shown a greater increase in clicks compared to the Test Group.")
+
 # Logging for debugging
 if uploaded_file is None:
     logging.info("Waiting for file upload...")
