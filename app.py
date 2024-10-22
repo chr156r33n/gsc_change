@@ -164,7 +164,7 @@ if uploaded_file is not None:
         # Test group summary
         st.write("### Test Group")
         st.markdown("For us to be confident the test has lead to an improvement, we'd expect some levels of improvement in period on period or year over year AND that improvement to be above the control group. If traffic to the test pages is impacted by seasonality and/or sales, then pre test vs post test may not give accurate findings. Year over year should be considered if the test pages are comparable against the previous year. If you're confident it is a fair comparison, then a positive YoY figure is a good sign.")
-        st.write(f"#### **Clicks:** Test period: {test_metrics_test_period['Url Clicks']:.2f}, "
+        st.write(f"##### **Clicks:** Test period: {test_metrics_test_period['Url Clicks']:.2f}, "
                  f"Pre-test: {test_metrics_pre_test['Url Clicks']:.2f} "
                  f"({rel_diff_test_pre['Url Clicks']:.2f}% change), "
                  f"YoY: {test_metrics_prev_year['Url Clicks']:.2f} "
@@ -179,7 +179,7 @@ if uploaded_file is not None:
         # Control group summary
         st.write("### Control Group")
         st.markdown("The control group change is important because we _didn't_ make a change to these URLs. Therefore and change in performance here would - we'd expect - be different from the test group. If the control group is out-performing the test, we can assume that the test was less-likely to be posisitve. If the control is under-performing the test, it could mean that the test changes were positive. If the two values are broadly the same, then it conclusions could be less sure.")
-        st.write(f"#### **Clicks:** Test period: {control_metrics_test_period['Url Clicks']:.2f}, "
+        st.write(f"##### **Clicks:** Test period: {control_metrics_test_period['Url Clicks']:.2f}, "
                  f"Pre-test: {control_metrics_pre_test['Url Clicks']:.2f} "
                  f"({rel_diff_control_pre['Url Clicks']:.2f}% change), "
                  f"YoY: {control_metrics_prev_year['Url Clicks']:.2f} "
