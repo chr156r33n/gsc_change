@@ -25,6 +25,13 @@ def convert_df_to_csv(df):
     df.to_csv(csv_buffer, index=False)
     return csv_buffer.getvalue()
 
+# Function to filter DataFrame by regex
+def filter_by_regex(df, regex):
+    if regex:
+        # Use regex to filter the 'Landing Page' column
+        return df[df['Landing Page'].str.contains(regex, regex=True)]
+    return df  # Return the original DataFrame if no regex is provided
+
 # Streamlit interface
 st.title("GSC Page Group Analysis")
 st.markdown("Export the GSC data in the right format from [here](https://lookerstudio.google.com/u/0/reporting/7d53bdfb-263d-484d-a959-0d9205eaf2e2/page/hiLGE/edit). Just ensure you have enough data to cover the pre and post change date range! Upload the exported CSV below to proceed.")
@@ -32,7 +39,7 @@ st.markdown("Export the GSC data in the right format from [here](https://lookers
 # Add a button to download the sample CSV
 sample_df = create_sample_csv()
 csv_data = convert_df_to_csv(sample_df)
-st.markdown("For this to work, the format of the CSV file needs to be exactly as anticipated, click download below to see an example of the format provided. The date must be yyyy-mm-dd format!")
+st.markdown("For this to work, the format of the CSV file needs to be exactly as anticipated, click download below to see an example of the format provided. The date must be yyyy-mm-dd format!"
 st.download_button(label="Download Sample CSV", data=csv_data, file_name='sample_gsc_data.csv', mime='text/csv')
 
 # Upload CSV file
