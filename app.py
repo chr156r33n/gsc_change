@@ -61,11 +61,11 @@ if uploaded_file is not None:
     
     # Automatically calculate the control period
     if test_start and test_end:
-        test_period_length = (test_end - test_start).days
+        test_period_length = (test_end - test_start).days + 1  # Include both start and end dates
         
         # Pre-test period
         pre_test_end = test_start - timedelta(days=1)
-        pre_test_start = pre_test_end - timedelta(days=test_period_length)
+        pre_test_start = pre_test_end - timedelta(days=test_period_length - 1)
         
         # Previous year same period
         prev_year_test_start = test_start - timedelta(days=365)
@@ -103,58 +103,61 @@ if uploaded_file is not None:
         control_period = filter_by_date(control_group, test_start, test_end)
         control_metrics_test_period = control_period[['Url Clicks', 'Impressions']].sum()
 
-        # Calculate differences for test and control groups
-        test_differences = []
-        control_differences = []
-        for metric in ['Url Clicks', 'Impressions']:
-            # Test Group: test vs pre-test, and test vs previous year
-            abs_diff_test_pre, rel_diff_test_pre = calculate_differences(test_metrics_test_period[metric], test_metrics_pre_test[metric])
-            abs_diff_test_yoy, rel_diff_test_yoy = calculate_differences(test_metrics_test_period[metric], test_metrics_prev_year[metric])
+        # Days per period
+        pre_test_days = len(test_pre_test['Date'].unique())
+        test_days = len(test_period['Date'].unique())
+        prev_year_days = len(test_prev_year['Date'].unique())
 
-            test_differences.append({
-                "Metric": metric,
-                "Test Group Absolute Difference (vs Pre-Test)": abs_diff_test_pre,
-                "Test Group Relative Difference (vs Pre-Test) (%)": rel_diff_test_pre,
-                "Test Group Absolute Difference (vs YoY)": abs_diff_test_yoy,
-                "Test Group Relative Difference (vs YoY) (%)": rel_diff_test_yoy
-            })
+        # Calculate clicks/impressions per day for each period
+        def calculate_per_day(metrics, days):
+            return (metrics / days) if days > 0 else float('nan')
 
-            # Control Group: test vs pre-test, and test vs previous year
-            abs_diff_control_pre, rel_diff_control_pre = calculate_differences(control_metrics_test_period[metric], control_metrics_pre_test[metric])
-            abs_diff_control_yoy, rel_diff_control_yoy = calculate_differences(control_metrics_test_period[metric], control_metrics_prev_year[metric])
+        test_clicks_per_day_test = calculate_per_day(test_metrics_test_period['Url Clicks'], test_days)
+        test_impressions_per_day_test = calculate_per_day(test_metrics_test_period['Impressions'], test_days)
 
-            control_differences.append({
-                "Metric": metric,
-                "Control Group Absolute Difference (vs Pre-Test)": abs_diff_control_pre,
-                "Control Group Relative Difference (vs Pre-Test) (%)": rel_diff_control_pre,
-                "Control Group Absolute Difference (vs YoY)": abs_diff_control_yoy,
-                "Control Group Relative Difference (vs YoY) (%)": rel_diff_control_yoy
-            })
-        
-        # Display metric differences for test group
-        st.subheader("Test Group: Metric Differences (Test vs Pre-Test and YoY)")
-        st.write(pd.DataFrame(test_differences))
+        test_clicks_per_day_pre_test = calculate_per_day(test_metrics_pre_test['Url Clicks'], pre_test_days)
+        test_impressions_per_day_pre_test = calculate_per_day(test_metrics_pre_test['Impressions'], pre_test_days)
 
-        # Display metric differences for control group
-        st.subheader("Control Group: Metric Differences (Test vs Pre-Test and YoY)")
-        st.write(pd.DataFrame(control_differences))
+        test_clicks_per_day_prev_year = calculate_per_day(test_metrics_prev_year['Url Clicks'], prev_year_days)
+        test_impressions_per_day_prev_year = calculate_per_day(test_metrics_prev_year['Impressions'], prev_year_days)
 
-        # Display aggregate clicks and impressions for each period
-        st.subheader("Aggregate Clicks and Impressions by Period")
-        
+        control_clicks_per_day_test = calculate_per_day(control_metrics_test_period['Url Clicks'], test_days)
+        control_impressions_per_day_test = calculate_per_day(control_metrics_test_period['Impressions'], test_days)
+
+        control_clicks_per_day_pre_test = calculate_per_day(control_metrics_pre_test['Url Clicks'], pre_test_days)
+        control_impressions_per_day_pre_test = calculate_per_day(control_metrics_pre_test['Impressions'], pre_test_days)
+
+        control_clicks_per_day_prev_year = calculate_per_day(control_metrics_prev_year['Url Clicks'], prev_year_days)
+        control_impressions_per_day_prev_year = calculate_per_day(control_metrics_prev_year['Impressions'], prev_year_days)
+
+        # Display aggregate clicks and impressions for each period, including per day metrics
+        st.subheader("Aggregate Clicks and Impressions by Period (Test Group)")
+
         st.write("**Test Group - Test Period**")
         st.write(test_metrics_test_period)
+        st.write(f"Clicks per day: {test_clicks_per_day_test}, Impressions per day: {test_impressions_per_day_test}")
+
         st.write("**Test Group - Pre-Test Period**")
         st.write(test_metrics_pre_test)
+        st.write(f"Clicks per day: {test_clicks_per_day_pre_test}, Impressions per day: {test_impressions_per_day_pre_test}")
+
         st.write("**Test Group - Last Year's Test Period**")
         st.write(test_metrics_prev_year)
+        st.write(f"Clicks per day: {test_clicks_per_day_prev_year}, Impressions per day: {test_impressions_per_day_prev_year}")
+
+        st.subheader("Aggregate Clicks and Impressions by Period (Control Group)")
 
         st.write("**Control Group - Test Period**")
         st.write(control_metrics_test_period)
+        st.write(f"Clicks per day: {control_clicks_per_day_test}, Impressions per day: {control_impressions_per_day_test}")
+
         st.write("**Control Group - Pre-Test Period**")
         st.write(control_metrics_pre_test)
+        st.write(f"Clicks per day: {control_clicks_per_day_pre_test}, Impressions per day: {control_impressions_per_day_pre_test}")
+
         st.write("**Control Group - Last Year's Test Period**")
         st.write(control_metrics_prev_year)
+        st.write(f"Clicks per day: {control_clicks_per_day_prev_year}, Impressions per day: {control_impressions_per_day_prev_year}")
 
 # Logging for debugging
 if uploaded_file is None:
