@@ -25,6 +25,18 @@ def convert_df_to_csv(df):
     df.to_csv(csv_buffer, index=False)
     return csv_buffer.getvalue()
 
+# Helper functions
+def filter_by_regex(data, regex):
+    return data[data['Landing Page'].str.contains(regex, na=False, flags=re.IGNORECASE)]
+
+def filter_by_date(data, start_date, end_date):
+    return data[(data['Date'] >= start_date) & (data['Date'] <= end_date)]
+
+def calculate_differences(current, previous):
+    absolute_diff = current - previous
+    relative_diff = (absolute_diff / previous * 100) if previous != 0 else None
+    return absolute_diff, relative_diff
+
 # Streamlit interface
 st.title("GSC Page Group Analysis")
 st.markdown("Export the GSC data in the right format from [here](https://lookerstudio.google.com/u/0/reporting/7d53bdfb-263d-484d-a959-0d9205eaf2e2/page/hiLGE/edit). Just ensure you have enough data to cover the pre and post change date range! Upload the exported CSV below to proceed.")
@@ -112,58 +124,49 @@ if uploaded_file is not None:
         # Calculate differences for test and control groups
         test_differences = []
         control_differences = []
+        rel_diff_test_pre = {}
+        rel_diff_test_yoy = {}
+        rel_diff_control_pre = {}
+        rel_diff_control_yoy = {}
+        
         for metric in ['Url Clicks', 'Impressions']:
             # Test Group: test vs pre-test, and test vs previous year
-            abs_diff_test_pre, rel_diff_test_pre = calculate_differences(test_metrics_test_period[metric], test_metrics_pre_test[metric])
-            abs_diff_test_yoy, rel_diff_test_yoy = calculate_differences(test_metrics_test_period[metric], test_metrics_prev_year[metric])
+            abs_diff_test_pre, rel_diff_test_pre[metric] = calculate_differences(test_metrics_test_period[metric], test_metrics_pre_test[metric])
+            abs_diff_test_yoy, rel_diff_test_yoy[metric] = calculate_differences(test_metrics_test_period[metric], test_metrics_prev_year[metric])
 
             test_differences.append({
                 "Metric": metric,
                 "Test Group Absolute Difference (vs Pre-Test)": abs_diff_test_pre,
-                "Test Group Relative Difference (vs Pre-Test) (%)": rel_diff_test_pre,
+                "Test Group Relative Difference (vs Pre-Test) (%)": rel_diff_test_pre[metric],
                 "Test Group Absolute Difference (vs YoY)": abs_diff_test_yoy,
-                "Test Group Relative Difference (vs YoY) (%)": rel_diff_test_yoy
+                "Test Group Relative Difference (vs YoY) (%)": rel_diff_test_yoy[metric]
             })
 
             # Control Group: test vs pre-test, and test vs previous year
-            abs_diff_control_pre, rel_diff_control_pre = calculate_differences(control_metrics_test_period[metric], control_metrics_pre_test[metric])
-            abs_diff_control_yoy, rel_diff_control_yoy = calculate_differences(control_metrics_test_period[metric], control_metrics_prev_year[metric])
+            abs_diff_control_pre, rel_diff_control_pre[metric] = calculate_differences(control_metrics_test_period[metric], control_metrics_pre_test[metric])
+            abs_diff_control_yoy, rel_diff_control_yoy[metric] = calculate_differences(control_metrics_test_period[metric], control_metrics_prev_year[metric])
 
             control_differences.append({
                 "Metric": metric,
                 "Control Group Absolute Difference (vs Pre-Test)": abs_diff_control_pre,
-                "Control Group Relative Difference (vs Pre-Test) (%)": rel_diff_control_pre,
+                "Control Group Relative Difference (vs Pre-Test) (%)": rel_diff_control_pre[metric],
                 "Control Group Absolute Difference (vs YoY)": abs_diff_control_yoy,
-                "Control Group Relative Difference (vs YoY) (%)": rel_diff_control_yoy
+                "Control Group Relative Difference (vs YoY) (%)": rel_diff_control_yoy[metric]
             })
         
-        # Display metric differences for test group
-        st.subheader("Test Group: Metric Differences (Test vs Pre-Test and YoY)")
-        st.write(pd.DataFrame(test_differences))
-
-        # Display metric differences for control group
-        st.subheader("Control Group: Metric Differences (Test vs Pre-Test and YoY)")
-        st.write(pd.DataFrame(control_differences))
-
-        # Display aggregate clicks and impressions for each period
-        st.subheader("Aggregate Clicks and Impressions by Period")
+        # Summary of key results
+        st.subheader("Summary of Results")
         
-        st.write("**Test Group - Test Period**")
-        st.write(test_metrics_test_period)
-        st.write("**Test Group - Pre-Test Period**")
-        st.write(test_metrics_pre_test)
-        st.write("**Test Group - Last Year's Test Period**")
-        st.write(test_metrics_prev_year)
-
-        st.write("**Control Group - Test Period**")
-        st.write(control_metrics_test_period)
-        st.write("**Control Group - Pre-Test Period**")
-        st.write(control_metrics_pre_test)
-        st.write("**Control Group - Last Year's Test Period**")
-        st.write(control_metrics_prev_year)
-
-# Logging for debugging
-if uploaded_file is None:
-    logging.info("Waiting for file upload...")
-else:
-    logging.info("File uploaded and analysis in progress.")
+        # Test group summary
+        st.write("### Test Group")
+        st.write(f"**Clicks:** Test period: {test_metrics_test_period['Url Clicks']}, "
+                 f"Pre-test: {test_metrics_pre_test['Url Clicks']} ({rel_diff_test_pre['Url Clicks']}% change), "
+                 f"YoY: {test_metrics_prev_year['Url Clicks']} ({rel_diff_test_yoy['Url Clicks']}% change).")
+        
+        st.write(f"**Impressions:** Test period: {test_metrics_test_period['Impressions']}, "
+                 f"Pre-test: {test_metrics_pre_test['Impressions']} ({rel_diff_test_pre['Impressions']}% change), "
+                 f"YoY: {test_metrics_prev_year['Impressions']} ({rel_diff_test_yoy['Impressions']}% change).")
+        
+        # Control group summary
+        st.write("### Control Group")
+        st.write(f"**Clicks
