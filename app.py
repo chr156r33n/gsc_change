@@ -170,7 +170,7 @@ if uploaded_file is not None:
                  f"YoY: {test_metrics_prev_year['Url Clicks']:.2f} "
                  f"({rel_diff_test_yoy['Url Clicks']:.2f}% change).")
         
-        st.write(f"#### **Impressions:** Test period: {test_metrics_test_period['Impressions']:.2f}, "
+        st.write(f"##### **Impressions:** Test period: {test_metrics_test_period['Impressions']:.2f}, "
                  f"Pre-test: {test_metrics_pre_test['Impressions']:.2f} "
                  f"({rel_diff_test_pre['Impressions']:.2f}% change), "
                  f"YoY: {test_metrics_prev_year['Impressions']:.2f} "
@@ -185,7 +185,7 @@ if uploaded_file is not None:
                  f"YoY: {control_metrics_prev_year['Url Clicks']:.2f} "
                  f"({rel_diff_control_yoy['Url Clicks']:.2f}% change).")
         
-        st.write(f"#### **Impressions:** Test period: {control_metrics_test_period['Impressions']:.2f}, "
+        st.write(f"##### **Impressions:** Test period: {control_metrics_test_period['Impressions']:.2f}, "
                  f"Pre-test: {control_metrics_pre_test['Impressions']:.2f} "
                  f"({rel_diff_control_pre['Impressions']:.2f}% change), "
                  f"YoY: {control_metrics_prev_year['Impressions']:.2f} "
