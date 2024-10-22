@@ -139,22 +139,34 @@ if uploaded_file is not None:
         st.subheader("Control Group: Metric Differences (Test vs Pre-Test and YoY)")
         st.write(pd.DataFrame(control_differences))
 
-        # Display aggregate clicks and impressions for each period
-        st.subheader("Aggregate Clicks and Impressions by Period")
+        # Display aggregate clicks and impressions for each period, including per day metrics
+        st.subheader("Aggregate Clicks and Impressions by Period (Test Group)")
         
         st.write("**Test Group - Test Period**")
         st.write(test_metrics_test_period)
+        st.write(f"Clicks per day: {test_clicks_per_day_test}, Impressions per day: {test_impressions_per_day_test}")
+        
         st.write("**Test Group - Pre-Test Period**")
         st.write(test_metrics_pre_test)
+        st.write(f"Clicks per day: {test_clicks_per_day_pre_test}, Impressions per day: {test_impressions_per_day_pre_test}")
+        
         st.write("**Test Group - Last Year's Test Period**")
         st.write(test_metrics_prev_year)
-
+        st.write(f"Clicks per day: {test_clicks_per_day_prev_year}, Impressions per day: {test_impressions_per_day_prev_year}")
+        
+        st.subheader("Aggregate Clicks and Impressions by Period (Control Group)")
+        
         st.write("**Control Group - Test Period**")
         st.write(control_metrics_test_period)
+        st.write(f"Clicks per day: {control_clicks_per_day_test}, Impressions per day: {control_impressions_per_day_test}")
+        
         st.write("**Control Group - Pre-Test Period**")
         st.write(control_metrics_pre_test)
+        st.write(f"Clicks per day: {control_clicks_per_day_pre_test}, Impressions per day: {control_impressions_per_day_pre_test}")
+        
         st.write("**Control Group - Last Year's Test Period**")
         st.write(control_metrics_prev_year)
+        st.write(f"Clicks per day: {control_clicks_per_day_prev_year}, Impressions per day: {control_impressions_per_day_prev_year}")
 
 # Logging for debugging
 if uploaded_file is None:
