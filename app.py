@@ -30,6 +30,10 @@ def filter_by_regex(data, regex):
     return data[data['Landing Page'].str.contains(regex, na=False, flags=re.IGNORECASE)]
 
 def filter_by_date(data, start_date, end_date):
+    # Ensure both start_date and end_date are pandas Timestamp objects
+    start_date = pd.to_datetime(start_date)
+    end_date = pd.to_datetime(end_date)
+    
     return data[(data['Date'] >= start_date) & (data['Date'] <= end_date)]
 
 def calculate_differences(current, previous):
