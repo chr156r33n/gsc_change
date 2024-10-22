@@ -32,6 +32,7 @@ st.markdown("Export the GSC data in the right format from [here](https://lookers
 # Add a button to download the sample CSV
 sample_df = create_sample_csv()
 csv_data = convert_df_to_csv(sample_df)
+st.markdown("For this to work, the format of the CSV file needs to be exactly as anticipated, click download below to see an example of the format provided. The date must be yyyy-mm-dd format!"
 st.download_button(label="Download Sample CSV", data=csv_data, file_name='sample_gsc_data.csv', mime='text/csv')
 
 # Upload CSV file
