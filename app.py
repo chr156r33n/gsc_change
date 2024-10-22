@@ -158,15 +158,22 @@ if uploaded_file is not None:
         st.subheader("Summary of Results")
         
         # Test group summary
+        # Test group summary
         st.write("### Test Group")
         st.write(f"**Clicks:** Test period: {test_metrics_test_period['Url Clicks']}, "
-                 f"Pre-test: {test_metrics_pre_test['Url Clicks']} ({rel_diff_test_pre['Url Clicks']}% change), "
-                 f"YoY: {test_metrics_prev_year['Url Clicks']} ({rel_diff_test_yoy['Url Clicks']}% change).")
-        
+         f"Pre-test: {test_metrics_pre_test['Url Clicks']} ({rel_diff_test_pre['Url Clicks']}% change), "
+         f"YoY: {test_metrics_prev_year['Url Clicks']} ({rel_diff_test_yoy['Url Clicks']}% change).")
+
         st.write(f"**Impressions:** Test period: {test_metrics_test_period['Impressions']}, "
-                 f"Pre-test: {test_metrics_pre_test['Impressions']} ({rel_diff_test_pre['Impressions']}% change), "
-                 f"YoY: {test_metrics_prev_year['Impressions']} ({rel_diff_test_yoy['Impressions']}% change).")
-        
+         f"Pre-test: {test_metrics_pre_test['Impressions']} ({rel_diff_test_pre['Impressions']}% change), "
+         f"YoY: {test_metrics_prev_year['Impressions']} ({rel_diff_test_yoy['Impressions']}% change).")
+
         # Control group summary
         st.write("### Control Group")
-        st.write(f"**Clicks
+        st.write(f"**Clicks:** Test period: {control_metrics_test_period['Url Clicks']}, "
+         f"Pre-test: {control_metrics_pre_test['Url Clicks']} ({rel_diff_control_pre['Url Clicks']}% change), "
+         f"YoY: {control_metrics_prev_year['Url Clicks']} ({rel_diff_control_yoy['Url Clicks']}% change).")
+
+        st.write(f"**Impressions:** Test period: {control_metrics_test_period['Impressions']}, "
+         f"Pre-test: {control_metrics_pre_test['Impressions']} ({rel_diff_control_pre['Impressions']}% change), "
+         f"YoY: {control_metrics_prev_year['Impressions']} ({rel_diff_control_yoy['Impressions']}% change).")
