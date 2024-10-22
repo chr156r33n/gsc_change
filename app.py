@@ -3,31 +3,36 @@ import pandas as pd
 import re
 import logging
 from datetime import timedelta
+from io import StringIO
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 
-# Function to filter URLs by regex pattern
-def filter_by_regex(data, pattern):
-    return data[data['Landing Page'].apply(lambda x: bool(re.search(pattern, x)))]
+# Create a sample CSV
+def create_sample_csv():
+    sample_data = {
+        "Date": ["2023-09-01", "2023-09-02", "2023-09-03", "2023-09-04"],
+        "Landing Page": ["/test-page-1", "/test-page-2", "/control-page-1", "/control-page-2"],
+        "Url Clicks": [100, 150, 200, 120],
+        "Impressions": [1000, 1200, 1500, 1100]
+    }
+    sample_df = pd.DataFrame(sample_data)
+    return sample_df
 
-# Function to calculate absolute and relative difference
-def calculate_differences(metric_current, metric_previous):
-    abs_diff = metric_current - metric_previous
-    if metric_previous != 0:
-        rel_diff = (abs_diff / metric_previous) * 100
-    else:
-        rel_diff = float('nan')
-    return abs_diff, rel_diff
-
-# Function to filter data by date range
-def filter_by_date(data, start_date, end_date):
-    mask = (data['Date'] >= pd.to_datetime(start_date)) & (data['Date'] <= pd.to_datetime(end_date))
-    return data.loc[mask]
+# Function to allow CSV download
+def convert_df_to_csv(df):
+    csv_buffer = StringIO()
+    df.to_csv(csv_buffer, index=False)
+    return csv_buffer.getvalue()
 
 # Streamlit interface
 st.title("GSC Page Group Analysis")
 st.markdown("Export the GSC data in the right format from [here](https://lookerstudio.google.com/u/0/reporting/7d53bdfb-263d-484d-a959-0d9205eaf2e2/page/hiLGE/edit). Just ensure you have enough data to cover the pre and post change date range! Upload the exported CSV below to proceed.")
+
+# Add a button to download the sample CSV
+sample_df = create_sample_csv()
+csv_data = convert_df_to_csv(sample_df)
+st.download_button(label="Download Sample CSV", data=csv_data, file_name='sample_gsc_data.csv', mime='text/csv')
 
 # Upload CSV file
 uploaded_file = st.file_uploader("Upload GSC CSV", type="csv")
