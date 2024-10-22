@@ -160,6 +160,14 @@ if uploaded_file is not None:
         
         # Summary of key results
         st.subheader("Summary of Results")
+
+        def color_metric(value):
+            if value > 0:
+                return f"<span style='color:green'>{value:.2f}%</span>"
+            elif value < 0:
+                return f"<span style='color:red'>{value:.2f}%</span>"
+            else:
+                return f"<span>{value:.2f}%</span>"
         
         # Test group summary
         st.write("### Test Group")
@@ -167,15 +175,15 @@ if uploaded_file is not None:
         
         st.write(f"##### **Clicks:** Test period: {test_metrics_test_period['Url Clicks']:,}, "
                  f"Pre-test: {test_metrics_pre_test['Url Clicks']:,} "
-                 f"({rel_diff_test_pre['Url Clicks']:.2f}% change), "
+                 f"({color_metric(rel_diff_test_pre['Url Clicks'])}), "
                  f"YoY: {test_metrics_prev_year['Url Clicks']:,} "
-                 f"({rel_diff_test_yoy['Url Clicks']:.2f}% change).")
+                 f"({color_metric(rel_diff_test_yoy['Url Clicks'])}).", unsafe_allow_html=True)
         
         st.write(f"##### **Impressions:** Test period: {test_metrics_test_period['Impressions']:,}, "
                  f"Pre-test: {test_metrics_pre_test['Impressions']:,} "
-                 f"({rel_diff_test_pre['Impressions']:.2f}% change), "
+                 f"({color_metric(rel_diff_test_pre['Impressions'])}), "
                  f"YoY: {test_metrics_prev_year['Impressions']:,} "
-                 f"({rel_diff_test_yoy['Impressions']:.2f}% change).")
+                 f"({color_metric(rel_diff_test_yoy['Impressions'])}).", unsafe_allow_html=True)
         
         # Control group summary
         st.write("### Control Group")
@@ -183,13 +191,12 @@ if uploaded_file is not None:
         
         st.write(f"##### **Clicks:** Test period: {control_metrics_test_period['Url Clicks']:,}, "
                  f"Pre-test: {control_metrics_pre_test['Url Clicks']:,} "
-                 f"({rel_diff_control_pre['Url Clicks']:.2f}% change), "
+                 f"({color_metric(rel_diff_control_pre['Url Clicks'])}), "
                  f"YoY: {control_metrics_prev_year['Url Clicks']:,} "
-                 f"({rel_diff_control_yoy['Url Clicks']:.2f}% change).")
+                 f"({color_metric(rel_diff_control_yoy['Url Clicks'])}).", unsafe_allow_html=True)
         
         st.write(f"##### **Impressions:** Test period: {control_metrics_test_period['Impressions']:,}, "
                  f"Pre-test: {control_metrics_pre_test['Impressions']:,} "
-                 f"({rel_diff_control_pre['Impressions']:.2f}% change), "
+                 f"({color_metric(rel_diff_control_pre['Impressions'])}), "
                  f"YoY: {control_metrics_prev_year['Impressions']:,} "
-                 f"({rel_diff_control_yoy['Impressions']:.2f}% change).")
-        
+                 f"({color_metric(rel_diff_control_yoy['Impressions'])}).", unsafe_allow_html=True)
