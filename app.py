@@ -25,13 +25,6 @@ def convert_df_to_csv(df):
     df.to_csv(csv_buffer, index=False)
     return csv_buffer.getvalue()
 
-# Function to filter DataFrame by regex
-def filter_by_regex(df, regex):
-    if regex:
-        # Use regex to filter the 'Landing Page' column
-        return df[df['Landing Page'].str.contains(regex, regex=True)]
-    return df  # Return the original DataFrame if no regex is provided
-
 # Streamlit interface
 st.title("GSC Page Group Analysis")
 st.markdown("Export the GSC data in the right format from [here](https://lookerstudio.google.com/u/0/reporting/7d53bdfb-263d-484d-a959-0d9205eaf2e2/page/hiLGE/edit). Just ensure you have enough data to cover the pre and post change date range! Upload the exported CSV below to proceed.")
@@ -168,29 +161,6 @@ if uploaded_file is not None:
         st.write(control_metrics_pre_test)
         st.write("**Control Group - Last Year's Test Period**")
         st.write(control_metrics_prev_year)
-
-        # Summary of results
-        st.subheader("Summary of Analysis Results")
-        
-        # Calculate overall changes
-        overall_test_clicks_change = test_metrics_test_period['Url Clicks'] - test_metrics_pre_test['Url Clicks']
-        overall_control_clicks_change = control_metrics_test_period['Url Clicks'] - control_metrics_pre_test['Url Clicks']
-        
-        overall_test_impressions_change = test_metrics_test_period['Impressions'] - test_metrics_pre_test['Impressions']
-        overall_control_impressions_change = control_metrics_test_period['Impressions'] - control_metrics_pre_test['Impressions']
-        
-        # Display summary
-        st.write(f"**Overall Change in Test Group Clicks:** {overall_test_clicks_change} (Test Period vs Pre-Test Period)")
-        st.write(f"**Overall Change in Control Group Clicks:** {overall_control_clicks_change} (Test Period vs Pre-Test Period)")
-        
-        st.write(f"**Overall Change in Test Group Impressions:** {overall_test_impressions_change} (Test Period vs Pre-Test Period)")
-        st.write(f"**Overall Change in Control Group Impressions:** {overall_control_impressions_change} (Test Period vs Pre-Test Period)")
-
-        # Additional insights
-        if overall_test_clicks_change > overall_control_clicks_change:
-            st.write("The Test Group has shown a greater increase in clicks compared to the Control Group.")
-        else:
-            st.write("The Control Group has shown a greater increase in clicks compared to the Test Group.")
 
 # Logging for debugging
 if uploaded_file is None:
