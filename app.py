@@ -44,6 +44,15 @@ def calculate_differences(current, previous):
     relative_diff = (absolute_diff / previous * 100) if previous != 0 else None
     return absolute_diff, relative_diff
 
+# Function for color-coding the results
+def colorize_diff(diff):
+    if diff > 0:
+        return f"<span style='color: green;'>+{diff:.2f}%</span>"
+    elif diff < 0:
+        return f"<span style='color: red;'>{diff:.2f}%</span>"
+    else:
+        return "<span style='color: black;'>0.00%</span>"
+
 # Streamlit interface
 st.title("GSC Page Group Analysis")
 
@@ -117,29 +126,11 @@ if uploaded_file is not None:
         test_period = filter_by_date(test_group, test_start, test_end)
         control_period = filter_by_date(control_group, test_start, test_end)
 
-        # NEW: Display the filtered data for debugging
-        st.write("Test Period Data")
-        st.write(test_period)
-        
-        # Count the number of days in each period
-        num_days_test_period = len(test_period['Date'].unique())
-        num_days_pre_test_period = len(test_pre_test['Date'].unique())
-        num_days_yoy_period = len(test_prev_year['Date'].unique())
-
         # Count unique pages in each period
         unique_pages_test = test_period['Landing Page'].nunique()
         unique_pages_pre_test = test_pre_test['Landing Page'].nunique()
         unique_pages_yoy = test_prev_year['Landing Page'].nunique()
 
-        # Display counts to debug
-        st.write(f"Number of days in the test period: {num_days_test_period}")
-        st.write(f"Number of days in the pre-test period: {num_days_pre_test_period}")
-        st.write(f"Number of days in the YoY period: {num_days_yoy_period}")
-
-        st.write(f"Unique pages in the test period: {unique_pages_test}")
-        st.write(f"Unique pages in the pre-test period: {unique_pages_pre_test}")
-        st.write(f"Unique pages in the YoY period: {unique_pages_yoy}")
-        
         # Sum metrics for each period
         test_metrics_test_period = test_period[['Url Clicks', 'Impressions']].sum()
         test_metrics_pre_test = test_pre_test[['Url Clicks', 'Impressions']].sum()
@@ -149,9 +140,20 @@ if uploaded_file is not None:
         control_metrics_pre_test = control_pre_test[['Url Clicks', 'Impressions']].sum()
         control_metrics_prev_year = control_prev_year[['Url Clicks', 'Impressions']].sum()
 
-        # Display results
-        st.subheader("Test Group Metrics")
-        st.write(test_metrics_test_period)
+        # Calculate differences
+        clicks_diff, clicks_yoy = calculate_differences(test_metrics_test_period['Url Clicks'], test_metrics_pre_test['Url Clicks'])
+        impressions_diff, impressions_yoy = calculate_differences(test_metrics_test_period['Impressions'], test_metrics_pre_test['Impressions'])
 
-        st.subheader("Control Group Metrics")
-        st.write(control_metrics_test_period)
+        # Display summary with color-coding
+        st.subheader("Test Group Metrics Summary")
+        st.markdown(f"**Url Clicks**: {test_metrics_test_period['Url Clicks']} (Diff: {colorize_diff(clicks_diff)}, YoY: {colorize_diff(clicks_yoy)})", unsafe_allow_html=True)
+        st.markdown(f"**Impressions**: {test_metrics_test_period['Impressions']} (Diff: {colorize_diff(impressions_diff)}, YoY: {colorize_diff(impressions_yoy)})", unsafe_allow_html=True)
+
+        # Repeat for control group
+        control_clicks_diff, control_clicks_yoy = calculate_differences(control_metrics_test_period['Url Clicks'], control_metrics_pre_test['Url Clicks'])
+        control_impressions_diff, control_impressions_yoy = calculate_differences(control_metrics_test_period['Impressions'], control_metrics_pre_test['Impressions'])
+
+        st.subheader("Control Group Metrics Summary")
+        st.markdown(f"**Url Clicks**: {control_metrics_test_period['Url Clicks']} (Diff: {colorize_diff(control_clicks_diff)}, YoY: {colorize_diff(control_clicks_yoy)})", unsafe_allow_html=True)
+        st.markdown(f"**Impressions**: {control_metrics_test_period['Impressions']} (Diff: {colorize_diff(control_impressions_diff)}, YoY: {colorize_diff(control_impressions_yoy)})", unsafe_allow_html=True)
+
