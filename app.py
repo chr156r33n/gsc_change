@@ -218,12 +218,14 @@ if uploaded_file is not None:
         control_period = filter_by_date(control_group, test_start, test_end)
 
         # NEW: Display the filtered data for debugging
-        st.write("### Test Period Data")
+        st.write("### Understand Your Data")
         st.markdown("Some extra information to help understand the comparison periods, check you have the right amount of days in the data etc.")
                     
-        st.write("#### Test Period URLs")
+        st.write("#### Test Group URLs")
+        st.write("Ensure that only the URLs you want to test are in here. If there are URLs you don't expect, it is likely the regex is wrong.")
         st.write(test_period)
-        st.write("#### Control Period URLs")
+        st.write("#### Control Group URLs")
+        st.write("If URLs in the control group are super-different to URLs in the test group the validity of the comparison may diminish.")
         st.write(control_period)
         
         # Count the number of days in each period
