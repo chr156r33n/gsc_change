@@ -44,15 +44,6 @@ def calculate_differences(current, previous):
     relative_diff = (absolute_diff / previous * 100) if previous != 0 else None
     return absolute_diff, relative_diff
 
-# Function for color-coding the results
-def colorize_diff(diff):
-    if diff > 0:
-        return f"<span style='color: green;'>+{diff:.2f}%</span>"
-    elif diff < 0:
-        return f"<span style='color: red;'>{diff:.2f}%</span>"
-    else:
-        return "<span style='color: black;'>0.00%</span>"
-
 # Streamlit interface
 st.title("GSC Page Group Analysis")
 
@@ -126,11 +117,29 @@ if uploaded_file is not None:
         test_period = filter_by_date(test_group, test_start, test_end)
         control_period = filter_by_date(control_group, test_start, test_end)
 
+        # NEW: Display the filtered data for debugging
+        st.write("Test Period Data")
+        st.write(test_period)
+        
+        # Count the number of days in each period
+        num_days_test_period = len(test_period['Date'].unique())
+        num_days_pre_test_period = len(test_pre_test['Date'].unique())
+        num_days_yoy_period = len(test_prev_year['Date'].unique())
+
         # Count unique pages in each period
         unique_pages_test = test_period['Landing Page'].nunique()
         unique_pages_pre_test = test_pre_test['Landing Page'].nunique()
         unique_pages_yoy = test_prev_year['Landing Page'].nunique()
 
+        # Display counts to debug
+        st.write(f"Number of days in the test period: {num_days_test_period}")
+        st.write(f"Number of days in the pre-test period: {num_days_pre_test_period}")
+        st.write(f"Number of days in the YoY period: {num_days_yoy_period}")
+
+        st.write(f"Unique pages in the test period: {unique_pages_test}")
+        st.write(f"Unique pages in the pre-test period: {unique_pages_pre_test}")
+        st.write(f"Unique pages in the YoY period: {unique_pages_yoy}")
+        
         # Sum metrics for each period
         test_metrics_test_period = test_period[['Url Clicks', 'Impressions']].sum()
         test_metrics_pre_test = test_pre_test[['Url Clicks', 'Impressions']].sum()
@@ -140,20 +149,41 @@ if uploaded_file is not None:
         control_metrics_pre_test = control_pre_test[['Url Clicks', 'Impressions']].sum()
         control_metrics_prev_year = control_prev_year[['Url Clicks', 'Impressions']].sum()
 
-        # Calculate differences
-        clicks_diff, clicks_yoy = calculate_differences(test_metrics_test_period['Url Clicks'], test_metrics_pre_test['Url Clicks'])
-        impressions_diff, impressions_yoy = calculate_differences(test_metrics_test_period['Impressions'], test_metrics_pre_test['Impressions'])
+        # Display results
+        st.subheader("Test Group Metrics")
+        st.write(test_metrics_test_period)
 
-        # Display summary with color-coding
-        st.subheader("Test Group Metrics Summary")
-        st.markdown(f"**Url Clicks**: {test_metrics_test_period['Url Clicks']} (Diff: {colorize_diff(clicks_diff)}, YoY: {colorize_diff(clicks_yoy)})", unsafe_allow_html=True)
-        st.markdown(f"**Impressions**: {test_metrics_test_period['Impressions']} (Diff: {colorize_diff(impressions_diff)}, YoY: {colorize_diff(impressions_yoy)})", unsafe_allow_html=True)
+        st.subheader("Control Group Metrics")
+        st.write(control_metrics_test_period)
 
-        # Repeat for control group
-        control_clicks_diff, control_clicks_yoy = calculate_differences(control_metrics_test_period['Url Clicks'], control_metrics_pre_test['Url Clicks'])
-        control_impressions_diff, control_impressions_yoy = calculate_differences(control_metrics_test_period['Impressions'], control_metrics_pre_test['Impressions'])
-
-        st.subheader("Control Group Metrics Summary")
-        st.markdown(f"**Url Clicks**: {control_metrics_test_period['Url Clicks']} (Diff: {colorize_diff(control_clicks_diff)}, YoY: {colorize_diff(control_clicks_yoy)})", unsafe_allow_html=True)
-        st.markdown(f"**Impressions**: {control_metrics_test_period['Impressions']} (Diff: {colorize_diff(control_impressions_diff)}, YoY: {colorize_diff(control_impressions_yoy)})", unsafe_allow_html=True)
-
+# Test group summary
+        st.write("### Test Group")
+        st.markdown("For us to be confident the test has led to an improvement, we'd expect some levels of improvement in period on period or year over year AND that improvement to be above the control group. If traffic to the test pages is impacted by seasonality and/or sales, then pre-test vs post-test may not give accurate findings. Year over year should be considered if the test pages are comparable against the previous year. If you're confident it is a fair comparison, then a positive YoY figure is a good sign.")
+        
+        st.write(f"##### **Clicks:** Test period: {test_metrics_test_period['Url Clicks']:,}, "
+                 f"Pre-test: {test_metrics_pre_test['Url Clicks']:,} "
+                 f"({color_metric(rel_diff_test_pre['Url Clicks'])}), "
+                 f"YoY: {test_metrics_prev_year['Url Clicks']:,} "
+                 f"({color_metric(rel_diff_test_yoy['Url Clicks'])}).", unsafe_allow_html=True)
+        
+        st.write(f"##### **Impressions:** Test period: {test_metrics_test_period['Impressions']:,}, "
+                 f"Pre-test: {test_metrics_pre_test['Impressions']:,} "
+                 f"({color_metric(rel_diff_test_pre['Impressions'])}), "
+                 f"YoY: {test_metrics_prev_year['Impressions']:,} "
+                 f"({color_metric(rel_diff_test_yoy['Impressions'])}).", unsafe_allow_html=True)
+        
+        # Control group summary
+        st.write("### Control Group")
+        st.markdown("The control group change is important because we _didn't_ make a change to these URLs. Therefore, any change in performance here would – we'd expect – be different from the test group. If the control group is out-performing the test, we can assume that the test was less likely to be positive. If the control is under-performing the test, it could mean that the test changes were positive. If the two values are broadly the same, then conclusions could be less sure.")
+        
+        st.write(f"##### **Clicks:** Test period: {control_metrics_test_period['Url Clicks']:,}, "
+                 f"Pre-test: {control_metrics_pre_test['Url Clicks']:,} "
+                 f"({color_metric(rel_diff_control_pre['Url Clicks'])}), "
+                 f"YoY: {control_metrics_prev_year['Url Clicks']:,} "
+                 f"({color_metric(rel_diff_control_yoy['Url Clicks'])}).", unsafe_allow_html=True)
+        
+        st.write(f"##### **Impressions:** Test period: {control_metrics_test_period['Impressions']:,}, "
+                 f"Pre-test: {control_metrics_pre_test['Impressions']:,} "
+                 f"({color_metric(rel_diff_control_pre['Impressions'])}), "
+                 f"YoY: {control_metrics_prev_year['Impressions']:,} "
+                 f"({color_metric(rel_diff_control_yoy['Impressions'])}).", unsafe_allow_html=True)
