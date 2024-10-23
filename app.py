@@ -156,6 +156,14 @@ if uploaded_file is not None:
         st.subheader("Control Group Metrics")
         st.write(control_metrics_test_period)
 
+    def color_metric(value):
+        if value > 0:
+            return f"<span style='color:green'>{value:.2f}%</span>"
+        elif value < 0:
+            return f"<span style='color:red'>{value:.2f}%</span>"
+        else:
+            return f"<span>{value:.2f}%</span>"
+
 # Test group summary
         st.write("### Test Group")
         st.markdown("For us to be confident the test has led to an improvement, we'd expect some levels of improvement in period on period or year over year AND that improvement to be above the control group. If traffic to the test pages is impacted by seasonality and/or sales, then pre-test vs post-test may not give accurate findings. Year over year should be considered if the test pages are comparable against the previous year. If you're confident it is a fair comparison, then a positive YoY figure is a good sign.")
@@ -171,14 +179,7 @@ if uploaded_file is not None:
                  f"({color_metric(rel_diff_test_pre['Impressions'])}), "
                  f"YoY: {test_metrics_prev_year['Impressions']:,} "
                  f"({color_metric(rel_diff_test_yoy['Impressions'])}).", unsafe_allow_html=True)
-        
-    def color_metric(value):
-        if value > 0:
-            return f"<span style='color:green'>{value:.2f}%</span>"
-        elif value < 0:
-            return f"<span style='color:red'>{value:.2f}%</span>"
-        else:
-            return f"<span>{value:.2f}%</span>"
+    
         
         # Control group summary
         st.write("### Control Group")
