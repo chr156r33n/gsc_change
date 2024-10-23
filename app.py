@@ -191,7 +191,7 @@ if uploaded_file is not None:
         
         st.write(f"##### **Clicks:** Test period: {control_metrics_test_period['Url Clicks']:,}, "
                  f"Pre-test: {control_metrics_pre_test['Url Clicks']:,} "
-                 f"({color_metric(rel_diff_control_pre['Url Clicks'])}), "
+                 f"({color_metric(rel_diff_control_pre['Url Clicks'])}), \n\n"
                  f"YoY: {control_metrics_prev_year['Url Clicks']:,} "
                  f"({color_metric(rel_diff_control_yoy['Url Clicks'])}).", unsafe_allow_html=True)
         
