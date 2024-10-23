@@ -200,4 +200,3 @@ if uploaded_file is not None:
                  f"({color_metric(rel_diff_control_pre['Impressions'])}), "
                  f"YoY: {control_metrics_prev_year['Impressions']:,} "
                  f"({color_metric(rel_diff_control_yoy['Impressions'])}).", unsafe_allow_html=True)
-
