@@ -201,22 +201,3 @@ if uploaded_file is not None:
                  f"YoY: {control_metrics_prev_year['Impressions']:,} "
                  f"({color_metric(rel_diff_control_yoy['Impressions'])}).", unsafe_allow_html=True)
 
-      # Count the number of days in each period
-        num_days_test_period = len(test_period['Date'].unique())
-        num_days_pre_test_period = len(test_pre_test['Date'].unique())
-        num_days_yoy_period = len(test_prev_year['Date'].unique())
-
-        # Count unique pages in each period
-        unique_pages_test = test_period['Landing Page'].nunique()
-        unique_pages_pre_test = test_pre_test['Landing Page'].nunique()
-        unique_pages_yoy = test_prev_year['Landing Page'].nunique()
-
-        # Display counts to debug
-        st.write(f"Number of days in the test period: {num_days_test_period}")
-        st.write(f"Number of days in the pre-test period: {num_days_pre_test_period}")
-        st.write(f"Number of days in the YoY period: {num_days_yoy_period}")
-
-        st.write(f"Unique pages in the test period: {unique_pages_test}")
-        st.write(f"Unique pages in the pre-test period: {unique_pages_pre_test}")
-        st.write(f"Unique pages in the YoY period: {unique_pages_yoy}")
-        
