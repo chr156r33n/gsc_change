@@ -221,6 +221,7 @@ if uploaded_file is not None:
         st.write("### Test Period Data")
         st.markdown("Some extra information to help understand the comparison periods, check you have the right amount of days in the data etc.")
         st.write(test_period)
+        st.write(control_period)
         
         # Count the number of days in each period
         num_days_test_period = len(test_period['Date'].unique())
