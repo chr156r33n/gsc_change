@@ -220,7 +220,10 @@ if uploaded_file is not None:
         # NEW: Display the filtered data for debugging
         st.write("### Test Period Data")
         st.markdown("Some extra information to help understand the comparison periods, check you have the right amount of days in the data etc.")
+                    
+        st.write("#### Test Period URLs")
         st.write(test_period)
+        st.write("#### Control Period URLs")
         st.write(control_period)
         
         # Count the number of days in each period
@@ -234,10 +237,12 @@ if uploaded_file is not None:
         unique_pages_yoy = test_prev_year['Landing Page'].nunique()
 
         # Display counts to debug
+        st.write("#### Number of Days")
         st.write(f"Number of days in the test period: {num_days_test_period}")
         st.write(f"Number of days in the pre-test period: {num_days_pre_test_period}")
         st.write(f"Number of days in the YoY period: {num_days_yoy_period}")
 
+        st.write("#### Number of Unique Pages")
         st.write(f"Unique pages in the test period: {unique_pages_test}")
         st.write(f"Unique pages in the pre-test period: {unique_pages_pre_test}")
         st.write(f"Unique pages in the YoY period: {unique_pages_yoy}")
