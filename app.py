@@ -201,7 +201,7 @@ if uploaded_file is not None:
                  f"YoY: {control_metrics_prev_year['Impressions']:,} "
                  f"({color_metric(rel_diff_control_yoy['Impressions'])}).", unsafe_allow_html=True)
 
-         if control_regex:
+        if control_regex:
             control_group = filter_by_regex(data, control_regex)
         else:
             control_group = data[~data.index.isin(test_group.index)]
