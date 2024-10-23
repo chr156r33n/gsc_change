@@ -172,13 +172,13 @@ if uploaded_file is not None:
                  f"YoY: {test_metrics_prev_year['Impressions']:,} "
                  f"({color_metric(rel_diff_test_yoy['Impressions'])}).", unsafe_allow_html=True)
         
-             def color_metric(value):
-                if value > 0:
-                    return f"<span style='color:green'>{value:.2f}%</span>"
-                elif value < 0:
-                    return f"<span style='color:red'>{value:.2f}%</span>"
-                else:
-                    return f"<span>{value:.2f}%</span>"
+    def color_metric(value):
+        if value > 0:
+            return f"<span style='color:green'>{value:.2f}%</span>"
+        elif value < 0:
+            return f"<span style='color:red'>{value:.2f}%</span>"
+        else:
+            return f"<span>{value:.2f}%</span>"
         
         # Control group summary
         st.write("### Control Group")
