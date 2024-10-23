@@ -200,3 +200,42 @@ if uploaded_file is not None:
                  f"({color_metric(rel_diff_control_pre['Impressions'])}), "
                  f"YoY: {control_metrics_prev_year['Impressions']:,} "
                  f"({color_metric(rel_diff_control_yoy['Impressions'])}).", unsafe_allow_html=True)
+
+         if control_regex:
+            control_group = filter_by_regex(data, control_regex)
+        else:
+            control_group = data[~data.index.isin(test_group.index)]
+        
+        # Filter data by pre-test and previous year periods
+        test_pre_test = filter_by_date(test_group, pre_test_start, pre_test_end)
+        test_prev_year = filter_by_date(test_group, prev_year_test_start, prev_year_test_end)
+
+        control_pre_test = filter_by_date(control_group, pre_test_start, pre_test_end)
+        control_prev_year = filter_by_date(control_group, prev_year_test_start, prev_year_test_end)
+
+        # Filter data by test period
+        test_period = filter_by_date(test_group, test_start, test_end)
+        control_period = filter_by_date(control_group, test_start, test_end)
+
+        # NEW: Display the filtered data for debugging
+        st.write("Test Period Data")
+        st.write(test_period)
+        
+        # Count the number of days in each period
+        num_days_test_period = len(test_period['Date'].unique())
+        num_days_pre_test_period = len(test_pre_test['Date'].unique())
+        num_days_yoy_period = len(test_prev_year['Date'].unique())
+
+        # Count unique pages in each period
+        unique_pages_test = test_period['Landing Page'].nunique()
+        unique_pages_pre_test = test_pre_test['Landing Page'].nunique()
+        unique_pages_yoy = test_prev_year['Landing Page'].nunique()
+
+        # Display counts to debug
+        st.write(f"Number of days in the test period: {num_days_test_period}")
+        st.write(f"Number of days in the pre-test period: {num_days_pre_test_period}")
+        st.write(f"Number of days in the YoY period: {num_days_yoy_period}")
+
+        st.write(f"Unique pages in the test period: {unique_pages_test}")
+        st.write(f"Unique pages in the pre-test period: {unique_pages_pre_test}")
+        st.write(f"Unique pages in the YoY period: {unique_pages_yoy}")
