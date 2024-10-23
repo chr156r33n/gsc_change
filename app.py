@@ -189,16 +189,16 @@ if uploaded_file is not None:
         st.write("### Control Group")
         st.markdown("The control group change is important because we _didn't_ make a change to these URLs. Therefore, any change in performance here would – we'd expect – be different from the test group. If the control group is out-performing the test, we can assume that the test was less likely to be positive. If the control is under-performing the test, it could mean that the test changes were positive. If the two values are broadly the same, then conclusions could be less sure.")
         
-        st.write(f"##### **Clicks:** Test period: {control_metrics_test_period['Url Clicks']:,}, "
-                 f"Pre-test: {control_metrics_pre_test['Url Clicks']:,} "
+        st.write(f"##### **Clicks:** Test period: {control_metrics_test_period['Url Clicks']:,},\n\n "
+                 f"Pre-test: {control_metrics_pre_test['Url Clicks']:,} \n\n"
                  f"({color_metric(rel_diff_control_pre['Url Clicks'])}), \n\n"
-                 f"YoY: {control_metrics_prev_year['Url Clicks']:,} "
+                 f"YoY: {control_metrics_prev_year['Url Clicks']:,} \n\n"
                  f"({color_metric(rel_diff_control_yoy['Url Clicks'])}).", unsafe_allow_html=True)
         
-        st.write(f"##### **Impressions:** Test period: {control_metrics_test_period['Impressions']:,}, "
-                 f"Pre-test: {control_metrics_pre_test['Impressions']:,} "
-                 f"({color_metric(rel_diff_control_pre['Impressions'])}), "
-                 f"YoY: {control_metrics_prev_year['Impressions']:,} "
+        st.write(f"##### **Impressions:** Test period: {control_metrics_test_period['Impressions']:,}, \n\n"
+                 f"Pre-test: {control_metrics_pre_test['Impressions']:,} \n\n"
+                 f"({color_metric(rel_diff_control_pre['Impressions'])}), \n\n"
+                 f"YoY: {control_metrics_prev_year['Impressions']:,} \n\n"
                  f"({color_metric(rel_diff_control_yoy['Impressions'])}).", unsafe_allow_html=True)
 
         if control_regex:
