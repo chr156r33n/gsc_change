@@ -218,7 +218,8 @@ if uploaded_file is not None:
         control_period = filter_by_date(control_group, test_start, test_end)
 
         # NEW: Display the filtered data for debugging
-        st.write("Test Period Data")
+        st.write("### Test Period Data")
+        st.markdown("Some extra information to help understand the comparison periods, check you have the right amount of days in the data etc.")
         st.write(test_period)
         
         # Count the number of days in each period
