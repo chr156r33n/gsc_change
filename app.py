@@ -113,38 +113,37 @@ if uploaded_file is not None:
         control_pre_test = filter_by_date(control_group, pre_test_start, pre_test_end)
         control_prev_year = filter_by_date(control_group, prev_year_test_start, prev_year_test_end)
 
-        # Filter data by test period
-        test_period = filter_by_date(test_group, test_start, test_end)
-        control_period = filter_by_date(control_group, test_start, test_end)
-
-        # Summary Statistics
-        # 1. Number of days in each period (check data completeness)
-        num_days_test_period = (test_period['Date'].nunique())
-        num_days_pre_test_period = (test_pre_test['Date'].nunique())
-        num_days_yoy_period = (test_prev_year['Date'].nunique())
-
-        # 2. Unique pages in each period
-        unique_pages_test_period = test_period['Landing Page'].nunique()
-        unique_pages_pre_test_period = test_pre_test['Landing Page'].nunique()
-        unique_pages_yoy_period = test_prev_year['Landing Page'].nunique()
-
-        st.subheader("Summary Statistics")
-        st.write(f"**Number of days in Test Period**: {num_days_test_period}")
-        st.write(f"**Number of days in Pre-Test Period**: {num_days_pre_test_period}")
-        st.write(f"**Number of days in YoY Period**: {num_days_yoy_period}")
-
-        st.write(f"**Unique Pages in Test Period**: {unique_pages_test_period}")
-        st.write(f"**Unique Pages in Pre-Test Period**: {unique_pages_pre_test_period}")
-        st.write(f"**Unique Pages in YoY Period**: {unique_pages_yoy_period}")
-
         # Sum metrics for each period (test, pre-test, and previous year)
         test_metrics_pre_test = test_pre_test[['Url Clicks', 'Impressions']].sum()
         test_metrics_prev_year = test_prev_year[['Url Clicks', 'Impressions']].sum()
         control_metrics_pre_test = control_pre_test[['Url Clicks', 'Impressions']].sum()
         control_metrics_prev_year = control_prev_year[['Url Clicks', 'Impressions']].sum()
-
+        
+        # Filter data by test period
+        test_period = filter_by_date(test_group, test_start, test_end)
         test_metrics_test_period = test_period[['Url Clicks', 'Impressions']].sum()
+        control_period = filter_by_date(control_group, test_start, test_end)
         control_metrics_test_period = control_period[['Url Clicks', 'Impressions']].sum()
+
+        # NEW STATISTICS
+
+        # Count the number of days in each period
+        num_days_test_period = (test_end - test_start).days + 1
+        num_days_pre_test_period = (pre_test_end - pre_test_start).days + 1
+        num_days_yoy_period = (prev_year_test_end - prev_year_test_start).days + 1
+
+        # Count unique pages in each period
+        unique_pages_test = test_period['Landing Page'].nunique()
+        unique_pages_pre_test = test_pre_test['Landing Page'].nunique()
+        unique_pages_yoy = test_prev_year['Landing Page'].nunique()
+
+        st.write(f"Number of days in the test period: {num_days_test_period}")
+        st.write(f"Number of days in the pre-test period: {num_days_pre_test_period}")
+        st.write(f"Number of days in the YoY period: {num_days_yoy_period}")
+
+        st.write(f"Unique pages in the test period: {unique_pages_test}")
+        st.write(f"Unique pages in the pre-test period: {unique_pages_pre_test}")
+        st.write(f"Unique pages in the YoY period: {unique_pages_yoy}")
 
         # Calculate differences for test and control groups
         test_differences = []
@@ -153,7 +152,7 @@ if uploaded_file is not None:
         rel_diff_test_yoy = {}
         rel_diff_control_pre = {}
         rel_diff_control_yoy = {}
-
+        
         for metric in ['Url Clicks', 'Impressions']:
             # Test Group: test vs pre-test, and test vs previous year
             abs_diff_test_pre, rel_diff_test_pre[metric] = calculate_differences(test_metrics_test_period[metric], test_metrics_pre_test[metric])
@@ -169,4 +168,19 @@ if uploaded_file is not None:
 
             # Control Group: test vs pre-test, and test vs previous year
             abs_diff_control_pre, rel_diff_control_pre[metric] = calculate_differences(control_metrics_test_period[metric], control_metrics_pre_test[metric])
-            abs_diff_control_yoy, rel_diff_control_yoy[metric] = calculate_d
+            abs_diff_control_yoy, rel_diff_control_yoy[metric] = calculate_differences(control_metrics_test_period[metric], control_metrics_prev_year[metric])
+
+            control_differences.append({
+                "Metric": metric,
+                "Control Group Absolute Difference (vs Pre-Test)": abs_diff_control_pre,
+                "Control Group Relative Difference (vs Pre-Test) (%)": rel_diff_control_pre[metric],
+                "Control Group Absolute Difference (vs YoY)": abs_diff_control_yoy,
+                "Control Group Relative Difference (vs YoY) (%)": rel_diff_control_yoy[metric]
+            })
+
+        # Display results
+        st.subheader("Test Group Differences")
+        st.write(pd.DataFrame(test_differences))
+
+        st.subheader("Control Group Differences")
+        st.write(pd.DataFrame(control_differences))
