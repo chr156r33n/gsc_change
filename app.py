@@ -30,11 +30,14 @@ def filter_by_regex(data, regex):
     return data[data['Landing Page'].str.contains(regex, na=False, flags=re.IGNORECASE)]
 
 def filter_by_date(data, start_date, end_date):
-    # Ensure both start_date and end_date are pandas Timestamp objects
     start_date = pd.to_datetime(start_date)
     end_date = pd.to_datetime(end_date)
     
-    return data[(data['Date'] >= start_date) & (data['Date'] <= end_date)]
+    filtered_data = data[(data['Date'] >= start_date) & (data['Date'] <= end_date)]
+    
+    # DEBUG: Log the number of rows filtered
+    logging.info(f"Filtered {len(filtered_data)} rows between {start_date} and {end_date}")
+    return filtered_data
 
 def calculate_differences(current, previous):
     absolute_diff = current - previous
@@ -43,12 +46,10 @@ def calculate_differences(current, previous):
 
 # Streamlit interface
 st.title("GSC Page Group Analysis")
-st.markdown("Export the GSC data in the right format from [here](https://lookerstudio.google.com/u/0/reporting/7d53bdfb-263d-484d-a959-0d9205eaf2e2/page/hiLGE/edit). Just ensure you have enough data to cover the pre and post change date range! Upload the exported CSV below to proceed.")
 
 # Add a button to download the sample CSV
 sample_df = create_sample_csv()
 csv_data = convert_df_to_csv(sample_df)
-st.markdown("For this to work, the format of the CSV file needs to be exactly as anticipated, click download below to see an example of the format provided. The date must be yyyy-mm-dd format!")
 st.download_button(label="Download Sample CSV", data=csv_data, file_name='sample_gsc_data.csv', mime='text/csv')
 
 # Upload CSV file
@@ -64,10 +65,10 @@ if uploaded_file is not None:
         # Convert 'Date' column to datetime with error handling
         data['Date'] = pd.to_datetime(data['Date'], format='%Y-%m-%d', errors='coerce')
         
-        # Check for NaT values in 'Date'
+        # DEBUG: Log any rows with invalid dates
         if data['Date'].isnull().any():
-            st.warning("There are invalid dates in the 'Date' column. These will be marked as NaT. Please check all dates are yyyy-mm-dd format.")
-            st.write(data[data['Date'].isnull()])
+            st.warning("Invalid dates found. Please check the 'Date' column format (yyyy-mm-dd).")
+            logging.error(f"Invalid dates in rows: {data[data['Date'].isnull()]}")
     
     # Convert Url Clicks and Impressions to numeric for easier handling
     data['Url Clicks'] = pd.to_numeric(data['Url Clicks'], errors='coerce')
@@ -75,13 +76,12 @@ if uploaded_file is not None:
     
     # User inputs for deployment date range and regex
     test_regex = st.text_input("Enter regex for Test group", "")
-    control_regex = st.text_input("Enter regex for Control group (optional) - Leave blank to compare against all page performance.", "")
+    control_regex = st.text_input("Enter regex for Control group (optional)", "")
     
     # Select test date range
     test_start = st.date_input("Test Start Date")
     test_end = st.date_input("Test End Date")
     
-    # Automatically calculate the control period
     if test_start and test_end:
         test_period_length = (test_end - test_start).days
         
@@ -104,39 +104,34 @@ if uploaded_file is not None:
         if control_regex:
             control_group = filter_by_regex(data, control_regex)
         else:
-            # Exclude the test group from the control group
             control_group = data[~data.index.isin(test_group.index)]
         
-        # Filter data by pre-test period and previous year period
+        # Filter data by pre-test and previous year periods
         test_pre_test = filter_by_date(test_group, pre_test_start, pre_test_end)
         test_prev_year = filter_by_date(test_group, prev_year_test_start, prev_year_test_end)
+
         control_pre_test = filter_by_date(control_group, pre_test_start, pre_test_end)
         control_prev_year = filter_by_date(control_group, prev_year_test_start, prev_year_test_end)
 
-        # Sum metrics for each period (test, pre-test, and previous year)
-        test_metrics_pre_test = test_pre_test[['Url Clicks', 'Impressions']].sum()
-        test_metrics_prev_year = test_prev_year[['Url Clicks', 'Impressions']].sum()
-        control_metrics_pre_test = control_pre_test[['Url Clicks', 'Impressions']].sum()
-        control_metrics_prev_year = control_prev_year[['Url Clicks', 'Impressions']].sum()
-        
         # Filter data by test period
         test_period = filter_by_date(test_group, test_start, test_end)
-        test_metrics_test_period = test_period[['Url Clicks', 'Impressions']].sum()
         control_period = filter_by_date(control_group, test_start, test_end)
-        control_metrics_test_period = control_period[['Url Clicks', 'Impressions']].sum()
 
-        # NEW STATISTICS
-
+        # NEW: Display the filtered data for debugging
+        st.write("Test Period Data")
+        st.write(test_period)
+        
         # Count the number of days in each period
-        num_days_test_period = (test_end - test_start).days + 1
-        num_days_pre_test_period = (pre_test_end - pre_test_start).days + 1
-        num_days_yoy_period = (prev_year_test_end - prev_year_test_start).days + 1
+        num_days_test_period = len(test_period['Date'].unique())
+        num_days_pre_test_period = len(test_pre_test['Date'].unique())
+        num_days_yoy_period = len(test_prev_year['Date'].unique())
 
         # Count unique pages in each period
         unique_pages_test = test_period['Landing Page'].nunique()
         unique_pages_pre_test = test_pre_test['Landing Page'].nunique()
         unique_pages_yoy = test_prev_year['Landing Page'].nunique()
 
+        # Display counts to debug
         st.write(f"Number of days in the test period: {num_days_test_period}")
         st.write(f"Number of days in the pre-test period: {num_days_pre_test_period}")
         st.write(f"Number of days in the YoY period: {num_days_yoy_period}")
@@ -144,43 +139,19 @@ if uploaded_file is not None:
         st.write(f"Unique pages in the test period: {unique_pages_test}")
         st.write(f"Unique pages in the pre-test period: {unique_pages_pre_test}")
         st.write(f"Unique pages in the YoY period: {unique_pages_yoy}")
-
-        # Calculate differences for test and control groups
-        test_differences = []
-        control_differences = []
-        rel_diff_test_pre = {}
-        rel_diff_test_yoy = {}
-        rel_diff_control_pre = {}
-        rel_diff_control_yoy = {}
         
-        for metric in ['Url Clicks', 'Impressions']:
-            # Test Group: test vs pre-test, and test vs previous year
-            abs_diff_test_pre, rel_diff_test_pre[metric] = calculate_differences(test_metrics_test_period[metric], test_metrics_pre_test[metric])
-            abs_diff_test_yoy, rel_diff_test_yoy[metric] = calculate_differences(test_metrics_test_period[metric], test_metrics_prev_year[metric])
+        # Sum metrics for each period
+        test_metrics_test_period = test_period[['Url Clicks', 'Impressions']].sum()
+        test_metrics_pre_test = test_pre_test[['Url Clicks', 'Impressions']].sum()
+        test_metrics_prev_year = test_prev_year[['Url Clicks', 'Impressions']].sum()
 
-            test_differences.append({
-                "Metric": metric,
-                "Test Group Absolute Difference (vs Pre-Test)": abs_diff_test_pre,
-                "Test Group Relative Difference (vs Pre-Test) (%)": rel_diff_test_pre[metric],
-                "Test Group Absolute Difference (vs YoY)": abs_diff_test_yoy,
-                "Test Group Relative Difference (vs YoY) (%)": rel_diff_test_yoy[metric]
-            })
-
-            # Control Group: test vs pre-test, and test vs previous year
-            abs_diff_control_pre, rel_diff_control_pre[metric] = calculate_differences(control_metrics_test_period[metric], control_metrics_pre_test[metric])
-            abs_diff_control_yoy, rel_diff_control_yoy[metric] = calculate_differences(control_metrics_test_period[metric], control_metrics_prev_year[metric])
-
-            control_differences.append({
-                "Metric": metric,
-                "Control Group Absolute Difference (vs Pre-Test)": abs_diff_control_pre,
-                "Control Group Relative Difference (vs Pre-Test) (%)": rel_diff_control_pre[metric],
-                "Control Group Absolute Difference (vs YoY)": abs_diff_control_yoy,
-                "Control Group Relative Difference (vs YoY) (%)": rel_diff_control_yoy[metric]
-            })
+        control_metrics_test_period = control_period[['Url Clicks', 'Impressions']].sum()
+        control_metrics_pre_test = control_pre_test[['Url Clicks', 'Impressions']].sum()
+        control_metrics_prev_year = control_prev_year[['Url Clicks', 'Impressions']].sum()
 
         # Display results
-        st.subheader("Test Group Differences")
-        st.write(pd.DataFrame(test_differences))
+        st.subheader("Test Group Metrics")
+        st.write(test_metrics_test_period)
 
-        st.subheader("Control Group Differences")
-        st.write(pd.DataFrame(control_differences))
+        st.subheader("Control Group Metrics")
+        st.write(control_metrics_test_period)
