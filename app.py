@@ -4,6 +4,8 @@ import re
 import logging
 from datetime import timedelta
 from io import StringIO
+from scipy.stats import ttest_ind
+
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -168,6 +170,18 @@ if uploaded_file is not None:
                 return f"<span style='color:red'>{value:.2f}%</span>"
             else:
                 return f"<span>{value:.2f}%</span>"
+
+        # Function to calculate p-value between two samples
+        def calculate_p_value(sample1, sample2):
+            stat, p_value = ttest_ind(sample1, sample2, equal_var=False)  # Welch's t-test
+            return p_value
+        # Calculate p-values for test and control groups
+        p_value_clicks_test_pre = calculate_p_value(test_period['Url Clicks'], test_pre_test['Url Clicks'])
+        p_value_clicks_yoy = calculate_p_value(test_period['Url Clicks'], test_prev_year['Url Clicks'])
+
+        p_value_control_clicks_pre = calculate_p_value(control_period['Url Clicks'], control_pre_test['Url Clicks'])
+        p_value_control_clicks_yoy = calculate_p_value(control_period['Url Clicks'], control_prev_year['Url Clicks'])
+
         
         # Test group summary
         st.write("### Test Group")
@@ -248,3 +262,12 @@ if uploaded_file is not None:
         st.write(f"Unique pages in the test period: {unique_pages_test}")
         st.write(f"Unique pages in the pre-test period: {unique_pages_pre_test}")
         st.write(f"Unique pages in the YoY period: {unique_pages_yoy}")
+
+        # Test group
+        st.markdown(f"**P-value for Clicks (Test vs Pre-test)**: {p_value_clicks_test_pre:.5f}")
+        st.markdown(f"**P-value for Clicks (Test vs YoY)**: {p_value_clicks_yoy:.5f}")
+        
+        # Control group
+        st.markdown(f"**P-value for Clicks (Control vs Pre-test)**: {p_value_control_clicks_pre:.5f}")
+        st.markdown(f"**P-value for Clicks (Control vs YoY)**: {p_value_control_clicks_yoy:.5f}")
+        
