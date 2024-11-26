@@ -88,6 +88,10 @@ if uploaded_file_current is not None and uploaded_file_previous is not None:
     test_start = st.date_input("Test Start Date")
     test_end = st.date_input("Test End Date")
     
+    # Convert test_start and test_end to pandas.Timestamp
+    test_start = pd.Timestamp(test_start)
+    test_end = pd.Timestamp(test_end)
+    
     # Automatically calculate the control period
     if test_start and test_end:
         test_period_length = (test_end - test_start).days
