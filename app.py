@@ -164,7 +164,9 @@ if uploaded_file is not None:
         st.subheader("Summary of Results")
 
         def color_metric(value):
-            if value > 0:
+            if value is None:
+                return "<span>n/a</span>"
+            elif value > 0:
                 return f"<span style='color:green'>{value:.2f}%</span>"
             elif value < 0:
                 return f"<span style='color:red'>{value:.2f}%</span>"
