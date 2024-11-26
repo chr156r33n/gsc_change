@@ -53,27 +53,32 @@ csv_data = convert_df_to_csv(sample_df)
 st.markdown("For this to work, the format of the CSV file needs to be exactly as anticipated, click download below to see an example of the format provided. The date must be yyyy-mm-dd format!")
 st.download_button(label="Download Sample CSV", data=csv_data, file_name='sample_gsc_data.csv', mime='text/csv')
 
-# Upload CSV file
-uploaded_file = st.file_uploader("Upload GSC CSV", type="csv")
-if uploaded_file is not None:
-    # Read CSV into a DataFrame
-    data = pd.read_csv(uploaded_file)
+# Upload CSV files
+uploaded_file_current = st.file_uploader("Upload Current Year GSC CSV", type="csv")
+uploaded_file_previous = st.file_uploader("Upload Previous Year GSC CSV", type="csv")
+
+if uploaded_file_current is not None and uploaded_file_previous is not None:
+    # Read CSVs into DataFrames
+    data_current = pd.read_csv(uploaded_file_current)
+    data_previous = pd.read_csv(uploaded_file_previous)
 
     # Ensure there's a 'Date' column and convert to datetime
-    if 'Date' not in data.columns:
-        st.error("The CSV file must contain a 'Date' column with daily data.")
-    else:
-        # Convert 'Date' column to datetime with error handling
-        data['Date'] = pd.to_datetime(data['Date'], format='%Y-%m-%d', errors='coerce')
-        
-        # Check for NaT values in 'Date'
-        if data['Date'].isnull().any():
-            st.warning("There are invalid dates in the 'Date' column. These will be marked as NaT. Please check all dates are yyyy-mm-dd format.")
-            st.write(data[data['Date'].isnull()])
-    
+    for data, label in [(data_current, "Current Year"), (data_previous, "Previous Year")]:
+        if 'Date' not in data.columns:
+            st.error(f"The {label} CSV file must contain a 'Date' column with daily data.")
+        else:
+            # Convert 'Date' column to datetime with error handling
+            data['Date'] = pd.to_datetime(data['Date'], format='%Y-%m-%d', errors='coerce')
+            
+            # Check for NaT values in 'Date'
+            if data['Date'].isnull().any():
+                st.warning(f"There are invalid dates in the '{label}' CSV 'Date' column. These will be marked as NaT. Please check all dates are yyyy-mm-dd format.")
+                st.write(data[data['Date'].isnull()])
+
     # Convert Url Clicks and Impressions to numeric for easier handling
-    data['Url Clicks'] = pd.to_numeric(data['Url Clicks'], errors='coerce')
-    data['Impressions'] = pd.to_numeric(data['Impressions'], errors='coerce')
+    for data in [data_current, data_previous]:
+        data['Url Clicks'] = pd.to_numeric(data['Url Clicks'], errors='coerce')
+        data['Impressions'] = pd.to_numeric(data['Impressions'], errors='coerce')
     
     # User inputs for deployment date range and regex
     test_regex = st.text_input("Enter regex for Test group", "")
@@ -97,23 +102,30 @@ if uploaded_file is not None:
         
         st.write(f"Pre-test period: {pre_test_start} to {pre_test_end}")
         st.write(f"Previous year (same as test period): {prev_year_test_start} to {prev_year_test_end}")
+
+        # Validate previous year data contains the correct date range
+        if not (data_previous['Date'].min() <= prev_year_test_start and data_previous['Date'].max() >= prev_year_test_end):
+            st.error("The Previous Year CSV does not contain the full date range required for comparison.")
     
     if st.button("Analyze"):
         # Filter test group using regex
-        test_group = filter_by_regex(data, test_regex)
+        test_group_current = filter_by_regex(data_current, test_regex)
+        test_group_previous = filter_by_regex(data_previous, test_regex)
         
         # Filter control group, default to everything else if no regex provided
         if control_regex:
-            control_group = filter_by_regex(data, control_regex)
+            control_group_current = filter_by_regex(data_current, control_regex)
+            control_group_previous = filter_by_regex(data_previous, control_regex)
         else:
             # Exclude the test group from the control group
-            control_group = data[~data.index.isin(test_group.index)]
+            control_group_current = data_current[~data_current.index.isin(test_group_current.index)]
+            control_group_previous = data_previous[~data_previous.index.isin(test_group_previous.index)]
         
         # Filter data by pre-test period and previous year period
-        test_pre_test = filter_by_date(test_group, pre_test_start, pre_test_end)
-        test_prev_year = filter_by_date(test_group, prev_year_test_start, prev_year_test_end)
-        control_pre_test = filter_by_date(control_group, pre_test_start, pre_test_end)
-        control_prev_year = filter_by_date(control_group, prev_year_test_start, prev_year_test_end)
+        test_pre_test = filter_by_date(test_group_current, pre_test_start, pre_test_end)
+        test_prev_year = filter_by_date(test_group_previous, prev_year_test_start, prev_year_test_end)
+        control_pre_test = filter_by_date(control_group_current, pre_test_start, pre_test_end)
+        control_prev_year = filter_by_date(control_group_previous, prev_year_test_start, prev_year_test_end)
 
         # Sum metrics for each period (test, pre-test, and previous year)
         test_metrics_pre_test = test_pre_test[['Url Clicks', 'Impressions']].sum()
@@ -122,9 +134,9 @@ if uploaded_file is not None:
         control_metrics_prev_year = control_prev_year[['Url Clicks', 'Impressions']].sum()
         
         # Filter data by test period
-        test_period = filter_by_date(test_group, test_start, test_end)
+        test_period = filter_by_date(test_group_current, test_start, test_end)
         test_metrics_test_period = test_period[['Url Clicks', 'Impressions']].sum()
-        control_period = filter_by_date(control_group, test_start, test_end)
+        control_period = filter_by_date(control_group_current, test_start, test_end)
         control_metrics_test_period = control_period[['Url Clicks', 'Impressions']].sum()
 
         # Calculate differences for test and control groups
@@ -217,22 +229,6 @@ if uploaded_file is not None:
                  f"YoY: {control_metrics_prev_year['Impressions']:,} \n\n"
                  f"({color_metric(rel_diff_control_yoy['Impressions'])}).", unsafe_allow_html=True)
 
-        if control_regex:
-            control_group = filter_by_regex(data, control_regex)
-        else:
-            control_group = data[~data.index.isin(test_group.index)]
-        
-        # Filter data by pre-test and previous year periods
-        test_pre_test = filter_by_date(test_group, pre_test_start, pre_test_end)
-        test_prev_year = filter_by_date(test_group, prev_year_test_start, prev_year_test_end)
-
-        control_pre_test = filter_by_date(control_group, pre_test_start, pre_test_end)
-        control_prev_year = filter_by_date(control_group, prev_year_test_start, prev_year_test_end)
-
-        # Filter data by test period
-        test_period = filter_by_date(test_group, test_start, test_end)
-        control_period = filter_by_date(control_group, test_start, test_end)
-
         # NEW: Display the filtered data for debugging
         st.write("### Understand Your Data")
         st.markdown("Some extra information to help understand the comparison periods, check you have the right amount of days in the data etc.")
@@ -272,4 +268,4 @@ if uploaded_file is not None:
         # Control group
         st.markdown(f"**P-value for Clicks (Control vs Pre-test)**: {p_value_control_clicks_pre:.5f}")
         st.markdown(f"**P-value for Clicks (Control vs YoY)**: {p_value_control_clicks_yoy:.5f}")
-        
+
