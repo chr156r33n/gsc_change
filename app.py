@@ -53,6 +53,7 @@ with st.expander("How to Use This App"):
     1. **Prepare Your Data**: Export Google Search Console (GSC) data following the required format.
        - Ensure columns: `Date`, `Landing Page`, `Url Clicks`, and `Impressions`.
        - Date format must be `yyyy-mm-dd`.
+       - The linked Data Studio link (above) will provide the information in the correct format.
 
     2. **Download Sample CSV**: If unsure about the format, download the sample CSV using the provided button.
 
@@ -74,8 +75,10 @@ with st.expander("How to Use This App"):
 
     ### Notes:
     - Ensure data accuracy by verifying all date entries are valid.
+    - Export enough data for the immediate pre/post dates AND the same date range for the previous year.
     - Most common point of failure is REGEX for page groups over/under matching - review to ensure accuracy.
     - For significant changes (above/below expectaction) ensure there are no significant outliers in the data or any evens in the pre/post periods which aren't comparable.
+    - If you do not have a control URL group just beware that the significance of the results may be negatively impacted. For example key categories or homepage will like make a valid comparison of the data harder.
     """)
 
 
