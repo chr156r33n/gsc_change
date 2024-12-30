@@ -47,6 +47,37 @@ def calculate_differences(current, previous):
 st.title("GSC Page Group Analysis")
 st.markdown("Export the GSC data in the right format from [here](https://lookerstudio.google.com/u/0/reporting/7d53bdfb-263d-484d-a959-0d9205eaf2e2/page/hiLGE/edit). Just ensure you have enough data to cover the pre and post change date range! Upload the exported CSV below to proceed.")
 
+# Collapsible instructions
+with st.expander("How to Use This App"):
+    st.markdown("""
+    1. **Prepare Your Data**: Export Google Search Console (GSC) data following the required format.
+       - Ensure columns: `Date`, `Landing Page`, `Url Clicks`, and `Impressions`.
+       - Date format must be `yyyy-mm-dd`.
+
+    2. **Download Sample CSV**: If unsure about the format, download the sample CSV using the provided button.
+
+    3. **Upload Files**:
+       - Upload the current year GSC CSV in the first uploader.
+       - Upload the previous year GSC CSV in the second uploader.
+
+    4. **Input Test Parameters**:
+       - Enter a regex for the test group to match URLs.
+       - Optionally, input a regex for the control group (leave blank for default behavior).
+       - Select the start and end dates for the test period.
+
+    5. **Run Analysis**:
+       - Click "Analyze" to compare performance metrics for test and control groups over different periods.
+
+    6. **Interpret Results**:
+       - Use the summary and detailed comparisons to assess the impact of changes.
+       - Check relative and absolute differences and p-values for statistical significance.
+
+    ### Notes:
+    - Ensure data accuracy by verifying all date entries are valid.
+    - For questions, refer to the [documentation](#) or contact support.
+    """)
+
+
 # Add a button to download the sample CSV
 sample_df = create_sample_csv()
 csv_data = convert_df_to_csv(sample_df)
