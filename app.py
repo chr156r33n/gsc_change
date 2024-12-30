@@ -74,7 +74,8 @@ with st.expander("How to Use This App"):
 
     ### Notes:
     - Ensure data accuracy by verifying all date entries are valid.
-    - For questions, refer to the [documentation](#) or contact support.
+    - Most common point of failure is REGEX for page groups over/under matching - review to ensure accuracy.
+    - For significant changes (above/below expectaction) ensure there are no significant outliers in the data or any evens in the pre/post periods which aren't comparable.
     """)
 
 
